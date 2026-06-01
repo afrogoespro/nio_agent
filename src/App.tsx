@@ -23,7 +23,11 @@ export default function App() {
 
   useEffect(() => {
     const stored = loadPlanFromSession()
-    if (stored?.input?.business) {
+    if (stored?.input?.business && stored.plan.icpExample.source) {
+      if (stored.plan.icpExample.name === 'Jordan Lee' && stored.plan.icpExample.source === 'example') {
+        clearPlanSession()
+        return
+      }
       setPlan(stored.plan)
       setInput({
         ...stored.input,

@@ -26,6 +26,8 @@ export interface OutreachPlan {
   icpTraits: string[]
   findLeadsTips: string[]
   drip: DripEmail[]
+  /** Why example lead was used instead of Apollo (null if Apollo worked) */
+  apolloNote?: string | null
 }
 
 export interface WizardInput {

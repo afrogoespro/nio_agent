@@ -1,0 +1,132 @@
+.hero-arc {
+  margin: 0 auto 2rem;
+  max-width: 34rem;
+  padding: 0 0.5rem;
+}
+
+.hero-arc__caption {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6366f1;
+  text-align: center;
+}
+
+.hero-arc__ring {
+  position: relative;
+  height: 11rem;
+  margin: 0 auto;
+}
+
+.hero-arc__item {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 5.5rem;
+}
+
+.hero-arc__avatar-wrap {
+  padding: 3px;
+  background: linear-gradient(135deg, #c7d2fe, #e9d5ff);
+  border-radius: 50%;
+  box-shadow:
+    0 10px 28px rgba(79, 70, 229, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.hero-arc__item:hover .hero-arc__avatar-wrap {
+  transform: translateY(-4px) scale(1.04);
+}
+
+.hero-arc__avatar {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #fff;
+}
+
+.hero-arc__item--2 .hero-arc__avatar-wrap {
+  padding: 4px;
+}
+
+.hero-arc__item--2 .hero-arc__avatar {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.hero-arc__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #57534e;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Arc positions: 0 far left low → 2 center high → 4 far right low */
+.hero-arc__item--0 {
+  left: 0;
+  bottom: 0.5rem;
+}
+
+.hero-arc__item--1 {
+  left: 19%;
+  bottom: 3.25rem;
+}
+
+.hero-arc__item--2 {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 6.5rem;
+}
+
+.hero-arc__item--2 .hero-arc__avatar-wrap {
+  margin: 0 auto;
+}
+
+.hero-arc__item--2:hover .hero-arc__avatar-wrap {
+  transform: translateY(-4px) scale(1.04);
+}
+
+.hero-arc__item--3 {
+  right: 19%;
+  bottom: 3.25rem;
+}
+
+.hero-arc__item--4 {
+  right: 0;
+  bottom: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .hero-arc__ring {
+    height: 10rem;
+  }
+
+  .hero-arc__item {
+    width: 4.5rem;
+  }
+
+  .hero-arc__item--2 .hero-arc__avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .hero-arc__item--1 {
+    left: 14%;
+    bottom: 2.5rem;
+  }
+
+  .hero-arc__item--3 {
+    right: 14%;
+    bottom: 2.5rem;
+  }
+}

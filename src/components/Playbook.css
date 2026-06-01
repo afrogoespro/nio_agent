@@ -34,6 +34,21 @@
   color: #3730a3;
 }
 
+.playbook__apollo-alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+}
+
+.playbook__apollo-alert strong {
+  color: #78350f;
+}
+
 .playbook__back {
   font-family: inherit;
   font-size: 0.9375rem;

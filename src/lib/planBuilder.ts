@@ -19,13 +19,28 @@ interface LeadContext {
   place: string
 }
 
+type ApolloFetchResult =
+  | { ok: true; person: ApolloPerson }
+  | { ok: false; reason: string }
+
 export async function buildOutreachPlan(
   input: WizardInput,
   apolloApiKey: string,
 ): Promise<OutreachPlan> {
-  const person = apolloApiKey
-    ? await fetchOnePerson(input, apolloApiKey)
-    : null
+  let apolloNote: string | null = null
+  let person: ApolloPerson | null = null
+
+  if (!apolloApiKey.trim()) {
+    apolloNote =
+      'Apollo key not found on server. Add APOLLO_API_KEY in Vercel, redeploy, then Start over.'
+  } else {
+    const result = await fetchOnePerson(input, apolloApiKey)
+    if (result.ok) {
+      person = result.person
+    } else {
+      apolloNote = result.reason
+    }
+  }
 
   const lead = person ? mapApolloToLead(person, input) : mapExampleLead(input)
   const ctx = leadContextFromIcp(lead)
@@ -43,14 +58,55 @@ export async function buildOutreachPlan(
     icpTraits: buildTraits(input),
     findLeadsTips: buildFindTips(input.customerLocation, input.yourLocation),
     drip,
+    apolloNote,
   }
 }
 
 async function fetchOnePerson(
   input: WizardInput,
   apiKey: string,
-): Promise<ApolloPerson | null> {
+): Promise<ApolloFetchResult> {
+  const keywords = buildApolloKeywords(input)
+  const location = input.customerLocation.trim() || input.yourLocation.trim()
+
+  const withLocation = location
+    ? await apolloSearch(apiKey, keywords, location)
+    : null
+
+  if (withLocation?.ok) return withLocation
+
+  const broader = await apolloSearch(apiKey, keywords, '')
+  if (broader.ok) return broader
+
+  return {
+    ok: false,
+    reason:
+      broader.reason ??
+      withLocation?.reason ??
+      'Apollo returned no people for this search. Try simpler keywords or a wider area.',
+  }
+}
+
+function buildApolloKeywords(input: WizardInput): string {
+  const parts = [input.idealCustomer.trim(), input.business.trim()].filter(Boolean)
+  return parts.join(' ').slice(0, 120)
+}
+
+async function apolloSearch(
+  apiKey: string,
+  keywords: string,
+  location: string,
+): Promise<ApolloFetchResult> {
   try {
+    const body: Record<string, unknown> = {
+      q_keywords: keywords,
+      per_page: 5,
+      page: 1,
+    }
+    if (location) {
+      body.person_locations = [location]
+    }
+
     const response = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
       method: 'POST',
       headers: {
@@ -58,24 +114,35 @@ async function fetchOnePerson(
         'Cache-Control': 'no-cache',
         'X-Api-Key': apiKey,
       },
-      body: JSON.stringify({
-        q_keywords: input.idealCustomer.trim(),
-        person_locations: input.customerLocation.trim()
-          ? [input.customerLocation.trim()]
-          : undefined,
-        per_page: 1,
-        page: 1,
-      }),
+      body: JSON.stringify(body),
     })
 
     const data = (await response.json().catch(() => ({}))) as {
       people?: ApolloPerson[]
+      contacts?: ApolloPerson[]
+      error?: string
+      message?: string
     }
 
-    if (!response.ok || !data.people?.length) return null
-    return data.people[0]
+    if (!response.ok) {
+      const msg = data.error ?? data.message ?? `Apollo error ${response.status}`
+      return { ok: false, reason: formatOutreachText(msg) }
+    }
+
+    const list = data.people ?? data.contacts ?? []
+    const person = list.find((p) => p.first_name || p.last_name)
+    if (!person) {
+      return {
+        ok: false,
+        reason: location
+          ? `No leads in ${location}. Trying a wider search.`
+          : 'No leads found for these keywords.',
+      }
+    }
+
+    return { ok: true, person }
   } catch {
-    return null
+    return { ok: false, reason: 'Could not reach Apollo. Check your API key and plan.' }
   }
 }
 
@@ -95,7 +162,7 @@ function mapApolloToLead(person: ApolloPerson, input: WizardInput): IcpExample {
     title,
     companyName: company,
     companyType: company,
-    foundVia: formatOutreachText(`Apollo search in ${area}`),
+    foundVia: formatOutreachText(`Found on Apollo near ${area}`),
     whyFit: [
       formatOutreachText(`Works at ${company} as ${title}`),
       place
@@ -114,7 +181,7 @@ function mapExampleLead(input: WizardInput): IcpExample {
     title: 'Owner',
     companyName: 'a sample business',
     companyType: formatOutreachText(companyHint(input.idealCustomer)),
-    foundVia: formatOutreachText('Example only. Apollo did not return a match.'),
+    foundVia: formatOutreachText('Example only. Not from Apollo.'),
     whyFit: [
       formatOutreachText(`Sounds like: ${truncate(input.idealCustomer, 80)}`),
       formatOutreachText(`Your why: ${truncate(input.whyTarget, 80)}`),

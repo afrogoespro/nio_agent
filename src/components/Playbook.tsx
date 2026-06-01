@@ -153,6 +153,13 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
         <div className="playbook__flow">
           <FlowProgress current={4} />
         </div>
+        {plan.apolloNote && plan.icpExample.source === 'example' && (
+          <div className="playbook__apollo-alert" role="alert">
+            <strong>Still showing the example person.</strong> {plan.apolloNote}{' '}
+            After fixing, click Start over and build a new plan.
+          </div>
+        )}
+
         <div className="playbook__title-block">
           {agent && (
             <img
