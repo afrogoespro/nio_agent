@@ -1,15 +1,6 @@
 import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
+import { apolloDisplayName, searchApolloPeople, type ApolloPerson } from './apolloSearch.js'
 import { formatEmail, formatOutreachText } from './outreachVoice.js'
-
-interface ApolloPerson {
-  first_name?: string
-  last_name?: string
-  title?: string
-  city?: string
-  state?: string
-  country?: string
-  organization?: { name?: string }
-}
 
 interface LeadContext {
   firstName: string
@@ -97,66 +88,13 @@ async function apolloSearch(
   keywords: string,
   location: string,
 ): Promise<ApolloFetchResult> {
-  try {
-    const body: Record<string, unknown> = {
-      q_keywords: keywords,
-      per_page: 5,
-      page: 1,
-    }
-    if (location) {
-      body.person_locations = [location]
-    }
-
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 6000)
-
-    const response = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'X-Api-Key': apiKey,
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    }).finally(() => clearTimeout(timer))
-
-    const data = (await response.json().catch(() => ({}))) as {
-      people?: ApolloPerson[]
-      contacts?: ApolloPerson[]
-      error?: string
-      message?: string
-    }
-
-    if (!response.ok) {
-      const msg = data.error ?? data.message ?? `Apollo error ${response.status}`
-      return { ok: false, reason: formatOutreachText(msg) }
-    }
-
-    const list = data.people ?? data.contacts ?? []
-    const person = list.find((p) => p.first_name || p.last_name)
-    if (!person) {
-      return {
-        ok: false,
-        reason: location
-          ? `No leads in ${location}. Trying a wider search.`
-          : 'No leads found for these keywords.',
-      }
-    }
-
-    return { ok: true, person }
-  } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      return { ok: false, reason: 'Apollo took too long. Using an example lead for now.' }
-    }
-    return { ok: false, reason: 'Could not reach Apollo. Check your API key and plan.' }
-  }
+  const result = await searchApolloPeople(apiKey, keywords, location)
+  if (!result.ok) return result
+  return { ok: true, person: result.people[0] }
 }
 
 function mapApolloToLead(person: ApolloPerson, input: WizardInput): IcpExample {
-  const first = (person.first_name ?? '').trim()
-  const last = (person.last_name ?? '').trim()
-  const fullName = [first, last].filter(Boolean).join(' ') || 'This contact'
+  const { firstName, fullName } = apolloDisplayName(person)
   const company = (person.organization?.name ?? '').trim() || 'a local business'
   const title = (person.title ?? '').trim() || 'Owner'
   const place = [person.city, person.state].filter(Boolean).join(', ')
@@ -165,7 +103,7 @@ function mapApolloToLead(person: ApolloPerson, input: WizardInput): IcpExample {
   return {
     source: 'apollo',
     name: fullName,
-    firstName: first || fullName.split(' ')[0] || 'there',
+    firstName,
     title,
     companyName: company,
     companyType: company,
