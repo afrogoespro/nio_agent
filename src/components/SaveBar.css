@@ -1,0 +1,49 @@
+.save-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding: 0.75rem 1rem;
+  background: rgba(28, 25, 23, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.save-bar__inner {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.save-bar__text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #d6d3d1;
+  flex: 1;
+  min-width: 200px;
+}
+
+.save-bar__text strong {
+  color: #fafaf9;
+}
+
+.save-bar__btn {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  min-height: 44px;
+  color: #1c1917;
+  background: #fafaf9;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.save-bar__btn:hover {
+  background: #fff;
+}

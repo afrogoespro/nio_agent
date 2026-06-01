@@ -1,0 +1,221 @@
+.how-scroll {
+  position: relative;
+  padding: 6rem 1.5rem 8rem;
+  background: #050508;
+  color: #f4f4f5;
+  overflow: clip;
+}
+
+.how-scroll::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99, 102, 241, 0.15), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(168, 85, 247, 0.08), transparent 50%);
+  pointer-events: none;
+}
+
+.how-scroll__header {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  margin: 0 auto 4rem;
+  text-align: center;
+}
+
+.how-scroll__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a78bfa;
+}
+
+.how-scroll__title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.how-scroll__subtitle {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #a1a1aa;
+}
+
+.how-scroll__track {
+  position: relative;
+  z-index: 1;
+  max-width: 56rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.how-scroll__line-col {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.how-scroll__svg {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.how-scroll__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.how-scroll__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  min-height: 8rem;
+}
+
+.how-scroll__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #3b82f6);
+  box-shadow:
+    0 0 0 4px rgba(99, 102, 241, 0.25),
+    0 0 24px rgba(168, 85, 247, 0.6);
+  z-index: 2;
+}
+
+.how-scroll__card {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  max-width: 22rem;
+  background: rgba(24, 24, 27, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.how-scroll__step--left .how-scroll__card {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+.how-scroll__step--right .how-scroll__card {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.how-scroll__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+}
+
+.how-scroll__card-body {
+  min-width: 0;
+}
+
+.how-scroll__step-num {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+.how-scroll__card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fafafa;
+}
+
+.how-scroll__card-desc {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #a1a1aa;
+}
+
+@media (min-width: 640px) {
+  .how-scroll__track {
+    grid-template-columns: 1fr;
+  }
+
+  .how-scroll__step {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .how-scroll__step--left .how-scroll__card {
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  .how-scroll__step--right .how-scroll__card {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .how-scroll__step--left .how-scroll__dot,
+  .how-scroll__step--right .how-scroll__dot {
+    left: 50%;
+  }
+}
+
+@media (max-width: 639px) {
+  .how-scroll__line-col {
+    left: 1.25rem;
+    transform: none;
+  }
+
+  .how-scroll__dot {
+    left: 1.25rem;
+  }
+
+  .how-scroll__step--left .how-scroll__card,
+  .how-scroll__step--right .how-scroll__card {
+    margin-left: 2.75rem;
+    margin-right: 0;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-scroll__card {
+    transition: none !important;
+  }
+}

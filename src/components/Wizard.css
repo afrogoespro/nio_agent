@@ -1,0 +1,148 @@
+.wizard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fafaf9;
+  color: #1c1917;
+}
+
+.wizard__header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+
+.wizard__header .wizard__back {
+  grid-column: 1;
+}
+
+.wizard__header .brand-mark {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.wizard__header .wizard__progress {
+  grid-column: 3;
+  text-align: right;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #78716c;
+}
+
+.wizard__flow {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 1rem;
+}
+
+.wizard__step-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #4f46e5;
+  letter-spacing: 0.02em;
+}
+
+.wizard__back {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #4f46e5;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  min-height: 44px;
+}
+
+.wizard__progress {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #78716c;
+}
+
+.wizard__main {
+  flex: 1;
+  max-width: 40rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.wizard__panel h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.wizard__hint {
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #57534e;
+}
+
+.wizard__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #44403c;
+}
+
+.wizard__input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  padding: 0.875rem 1rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 12px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.wizard__input:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-color: #4f46e5;
+}
+
+.wizard__input--single {
+  min-height: auto;
+  resize: none;
+}
+
+.wizard__footer {
+  padding: 1rem 1.5rem 2rem;
+  max-width: 40rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.wizard__cta {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  padding: 0.9rem 1.5rem;
+  min-height: 48px;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.wizard__cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.wizard__cta:not(:disabled):hover {
+  filter: brightness(1.05);
+}

@@ -1,0 +1,112 @@
+.plan-carousel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.plan-carousel__top {
+  margin-bottom: 1rem;
+}
+
+.plan-carousel__counter {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #78716c;
+}
+
+.plan-carousel__title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1c1917;
+}
+
+.plan-carousel__viewport {
+  flex: 1;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.plan-carousel__slide {
+  height: 100%;
+}
+
+.plan-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-carousel__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #d6d3d1;
+  cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  background-clip: content-box;
+  padding: 18px;
+  box-sizing: content-box;
+}
+
+.plan-carousel__dot--active {
+  background: #4f46e5;
+  background-clip: content-box;
+}
+
+.plan-carousel__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e7e5e4;
+}
+
+.plan-carousel__arrow {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.75rem 0.5rem;
+  min-height: 44px;
+}
+
+.plan-carousel__arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.plan-carousel__arrow--next {
+  margin-left: auto;
+}
+
+.plan-carousel__launch {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  min-height: 44px;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.plan-carousel__launch:hover {
+  filter: brightness(1.05);
+}
