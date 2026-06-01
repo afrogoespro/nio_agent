@@ -1,9 +1,13 @@
 export type AgentId = 'warm' | 'punchy' | 'formal' | 'curious' | 'urgent'
 
 export interface IcpExample {
+  source: 'apollo' | 'example'
   name: string
+  firstName: string
   title: string
+  companyName: string
   companyType: string
+  foundVia: string
   whyFit: string[]
 }
 

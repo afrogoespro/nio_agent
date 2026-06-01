@@ -175,6 +175,11 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.icp-card--real {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.12);
+}
+
 .icp-card__badge {
   margin: 0 0 0.75rem;
   font-size: 0.75rem;
@@ -182,6 +187,17 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #4f46e5;
+}
+
+.icp-card--real .icp-card__badge {
+  color: #4338ca;
+}
+
+.icp-card__found {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #059669;
 }
 
 .icp-card__name {

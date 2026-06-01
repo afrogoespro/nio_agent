@@ -106,11 +106,22 @@ export function IntegrationsPanel({
       setStatus(result.message ?? 'Search failed.')
       return
     }
-    const count = Array.isArray(result.people) ? result.people.length : 0
+    const people = Array.isArray(result.people) ? result.people : []
+    const first = people[0] as {
+      first_name?: string
+      last_name?: string
+      organization?: { name?: string }
+    } | undefined
+    const name = first
+      ? [first.first_name, first.last_name].filter(Boolean).join(' ')
+      : ''
+    const co = first?.organization?.name
     setApolloPreview(
-      count > 0
-        ? `Found ${count} possible leads. Full list view coming soon.`
-        : 'Search ran. No leads returned yet. Check your Apollo plan and filters.',
+      people.length > 0 && name
+        ? `Found ${name}${co ? ` at ${co}` : ''} and others. Your plan uses the first match.`
+        : people.length > 0
+          ? `Found ${people.length} leads. Your next plan will use the first match.`
+          : 'No leads returned. Try broader keywords or location.',
     )
     setStatus(result.message ?? 'Apollo search complete.')
   }

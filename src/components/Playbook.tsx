@@ -77,7 +77,9 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
         content: (
           <div className="playbook-slide">
             <p className="playbook-slide__lede">
-              One example person to look for. Not a real contact from the web.
+              {plan.icpExample.source === 'apollo'
+                ? 'A real person from Apollo. Your email uses their name and company.'
+                : 'Example only. Apollo did not return a match this time.'}
             </p>
             <IcpCard icp={plan.icpExample} />
           </div>

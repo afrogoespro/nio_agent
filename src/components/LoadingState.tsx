@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import './LoadingState.css'
 
 const MESSAGES = [
-  'Your rep is finding someone to contact…',
-  'Your rep is writing your opening email…',
-  'Your rep is planning your follow-ups…',
+  'Looking for a real person on Apollo…',
+  'Writing your email like a real conversation…',
+  'Planning your follow ups…',
 ]
 
 export function LoadingState() {
@@ -21,7 +21,7 @@ export function LoadingState() {
     <div className="loading-state" role="status" aria-live="polite">
       <div className="loading-state__spinner" aria-hidden="true" />
       <p className="loading-state__text">{MESSAGES[index]}</p>
-      <p className="loading-state__hint">On duty 24/7 — usually just a few seconds</p>
+      <p className="loading-state__hint">Usually just a few seconds</p>
     </div>
   )
 }
