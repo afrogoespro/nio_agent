@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { AgentId, WizardInput } from '../types/plan'
 import { BrandMark } from './BrandMark'
 import { FlowProgress } from './FlowProgress'
@@ -6,20 +6,33 @@ import type { FlowStage } from './FlowProgress'
 import { AgentPicker } from './AgentPicker'
 import './Wizard.css'
 
+export interface WizardDraft {
+  step: 1 | 2 | 3
+  business: string
+  valueProp: string
+  yourLocation: string
+  idealCustomer: string
+  whyTarget: string
+  customerLocation: string
+  agentId: AgentId | null
+}
+
 interface WizardProps {
   onComplete: (input: WizardInput) => void
   onBack: () => void
+  resume?: WizardDraft | null
+  errorMessage?: string | null
 }
 
-export function Wizard({ onComplete, onBack }: WizardProps) {
-  const [step, setStep] = useState(1)
-  const [business, setBusiness] = useState('')
-  const [valueProp, setValueProp] = useState('')
-  const [yourLocation, setYourLocation] = useState('')
-  const [idealCustomer, setIdealCustomer] = useState('')
-  const [whyTarget, setWhyTarget] = useState('')
-  const [customerLocation, setCustomerLocation] = useState('')
-  const [agentId, setAgentId] = useState<AgentId | null>(null)
+export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps) {
+  const [step, setStep] = useState<1 | 2 | 3>(resume?.step ?? 1)
+  const [business, setBusiness] = useState(resume?.business ?? '')
+  const [valueProp, setValueProp] = useState(resume?.valueProp ?? '')
+  const [yourLocation, setYourLocation] = useState(resume?.yourLocation ?? '')
+  const [idealCustomer, setIdealCustomer] = useState(resume?.idealCustomer ?? '')
+  const [whyTarget, setWhyTarget] = useState(resume?.whyTarget ?? '')
+  const [customerLocation, setCustomerLocation] = useState(resume?.customerLocation ?? '')
+  const [agentId, setAgentId] = useState<AgentId | null>(resume?.agentId ?? null)
 
   const flowStage: FlowStage = step <= 2 ? ((step + 1) as FlowStage) : 3
 
@@ -34,9 +47,10 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
       customerLocation.trim().length > 1) ||
     (step === 3 && agentId !== null)
 
-  function handleNext() {
+  const handleNext = useCallback(() => {
+    if (!canNext) return
     if (step < 3) {
-      setStep(step + 1)
+      setStep((step + 1) as 1 | 2 | 3)
       return
     }
     if (agentId) {
@@ -50,10 +64,53 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
         agentId,
       })
     }
+  }, [
+    canNext,
+    step,
+    agentId,
+    business,
+    valueProp,
+    yourLocation,
+    idealCustomer,
+    whyTarget,
+    customerLocation,
+    onComplete,
+  ])
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    handleNext()
   }
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Enter') return
+
+      const el = e.target as HTMLElement
+      const tag = el.tagName
+
+      if (tag === 'TEXTAREA') {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault()
+          handleNext()
+        }
+        return
+      }
+
+      if (tag === 'BUTTON' || el.getAttribute('role') === 'radio') return
+
+      if (canNext) {
+        e.preventDefault()
+        handleNext()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [canNext, handleNext])
+
   function handleBack() {
-    if (step > 1) setStep(step - 1)
+    if (step > 1) setStep((step - 1) as 1 | 2 | 3)
     else onBack()
   }
 
@@ -71,6 +128,7 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
         <FlowProgress current={flowStage} />
       </div>
 
+      <form className="wizard__form" onSubmit={handleSubmit}>
       <main className="wizard__main">
         {step === 1 && (
           <div className="wizard__panel">
@@ -173,15 +231,20 @@ export function Wizard({ onComplete, onBack }: WizardProps) {
       </main>
 
       <footer className="wizard__footer">
+        {errorMessage && step === 3 && (
+          <p className="wizard__error" role="alert">
+            {errorMessage}
+          </p>
+        )}
         <button
-          type="button"
+          type="submit"
           className="wizard__cta"
           disabled={!canNext}
-          onClick={handleNext}
         >
           {step < 3 ? 'Next' : 'Build my plan'}
         </button>
       </footer>
+      </form>
     </div>
   )
 }

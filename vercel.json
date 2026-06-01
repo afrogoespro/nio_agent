@@ -1,7 +1,11 @@
 {
   "functions": {
+    "api/generate-plan.ts": {
+      "maxDuration": 30,
+      "includeFiles": "{src/lib/**,src/types/**,api/lib/**}"
+    },
     "api/**/*.ts": {
-      "includeFiles": "src/lib/**"
+      "includeFiles": "{src/lib/**,api/lib/**}"
     }
   },
   "rewrites": [

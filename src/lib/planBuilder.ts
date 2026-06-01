@@ -1,5 +1,5 @@
-import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan'
-import { formatEmail, formatOutreachText } from './outreachVoice'
+import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
+import { formatEmail, formatOutreachText } from './outreachVoice.js'
 
 interface ApolloPerson {
   first_name?: string
@@ -107,6 +107,9 @@ async function apolloSearch(
       body.person_locations = [location]
     }
 
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 6000)
+
     const response = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
       method: 'POST',
       headers: {
@@ -115,7 +118,8 @@ async function apolloSearch(
         'X-Api-Key': apiKey,
       },
       body: JSON.stringify(body),
-    })
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timer))
 
     const data = (await response.json().catch(() => ({}))) as {
       people?: ApolloPerson[]
@@ -141,7 +145,10 @@ async function apolloSearch(
     }
 
     return { ok: true, person }
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return { ok: false, reason: 'Apollo took too long. Using an example lead for now.' }
+    }
     return { ok: false, reason: 'Could not reach Apollo. Check your API key and plan.' }
   }
 }
@@ -282,7 +289,7 @@ Reply if you want to talk this week.
     },
   }
 
-  return intros[agentId]
+  return intros[agentId] ?? intros.warm
 }
 
 function writeFollowUp(

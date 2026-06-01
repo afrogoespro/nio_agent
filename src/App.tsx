@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Landing } from './components/Landing'
-import { Wizard } from './components/Wizard'
+import { Wizard, type WizardDraft } from './components/Wizard'
 import { LoadingState } from './components/LoadingState'
 import { Playbook } from './components/Playbook'
 import { Launch } from './components/Launch'
@@ -15,10 +15,24 @@ import './App.css'
 
 type View = 'landing' | 'wizard' | 'loading' | 'plan' | 'launch'
 
+function toDraft(input: WizardInput): WizardDraft {
+  return {
+    step: 3,
+    business: input.business,
+    valueProp: input.valueProp,
+    yourLocation: input.yourLocation,
+    idealCustomer: input.idealCustomer,
+    whyTarget: input.whyTarget,
+    customerLocation: input.customerLocation,
+    agentId: input.agentId,
+  }
+}
+
 export default function App() {
   const [view, setView] = useState<View>('landing')
   const [plan, setPlan] = useState<OutreachPlan | null>(null)
   const [input, setInput] = useState<WizardInput | null>(null)
+  const [wizardResume, setWizardResume] = useState<WizardDraft | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -51,16 +65,25 @@ export default function App() {
 
   async function handleWizardComplete(wizardInput: WizardInput) {
     setInput(wizardInput)
+    setWizardResume(toDraft(wizardInput))
     setError(null)
     setView('loading')
 
     try {
       const result = await generatePlan(wizardInput)
+      if (!result?.icpExample?.name || !result?.sampleEmail?.body) {
+        throw new Error('Plan came back incomplete. Please try again.')
+      }
       setPlan(result)
       savePlanToSession(result, wizardInput)
+      setWizardResume(null)
       setView('plan')
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Something went wrong. Please try again.'
+      setError(message)
       setView('wizard')
     }
   }
@@ -69,6 +92,8 @@ export default function App() {
     clearPlanSession()
     setPlan(null)
     setInput(null)
+    setWizardResume(null)
+    setError(null)
     setView('landing')
   }
 
@@ -93,20 +118,16 @@ export default function App() {
 
   if (view === 'wizard') {
     return (
-      <>
-        {error && (
-          <p className="app-error" role="alert">
-            {error}
-          </p>
-        )}
-        <Wizard
-          onComplete={handleWizardComplete}
-          onBack={() => {
-            setError(null)
-            setView('landing')
-          }}
-        />
-      </>
+      <Wizard
+        onComplete={handleWizardComplete}
+        onBack={() => {
+          setError(null)
+          setWizardResume(null)
+          setView('landing')
+        }}
+        resume={wizardResume}
+        errorMessage={error}
+      />
     )
   }
 

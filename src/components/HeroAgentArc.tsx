@@ -9,10 +9,23 @@ const SHORT_LABELS: Record<string, string> = {
   urgent: 'Direct',
 }
 
-export function HeroAgentArc() {
+interface HeroAgentArcProps {
+  showCaption?: boolean
+  size?: 'default' | 'large'
+}
+
+export function HeroAgentArc({
+  showCaption = true,
+  size = 'default',
+}: HeroAgentArcProps) {
+  const sizeClass = size === 'large' ? ' hero-arc--large' : ''
   return (
-    <div className="hero-arc" aria-hidden="true">
-      <p className="hero-arc__caption">Pick your rep&apos;s voice</p>
+    <div
+      className={`hero-arc${showCaption ? '' : ' hero-arc--compact'}${sizeClass}`}
+    >
+      {showCaption && (
+        <p className="hero-arc__caption">Pick your rep&apos;s voice</p>
+      )}
       <div className="hero-arc__ring">
         {AGENTS.map((agent, index) => (
           <div
@@ -24,9 +37,10 @@ export function HeroAgentArc() {
                 className="hero-arc__avatar"
                 src={agent.image}
                 alt=""
-                width={index === 2 ? 88 : 72}
-                height={index === 2 ? 88 : 72}
+                width={index === 2 ? (size === 'large' ? 108 : 84) : size === 'large' ? 92 : 68}
+                height={index === 2 ? (size === 'large' ? 108 : 84) : size === 'large' ? 92 : 68}
                 loading="eager"
+                decoding="async"
               />
             </div>
             <span className="hero-arc__label">{SHORT_LABELS[agent.id]}</span>

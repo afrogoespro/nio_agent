@@ -64,6 +64,13 @@
   color: #78716c;
 }
 
+.wizard__form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .wizard__main {
   flex: 1;
   max-width: 40rem;
@@ -122,6 +129,18 @@
   max-width: 40rem;
   width: 100%;
   margin: 0 auto;
+}
+
+.wizard__error {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-align: center;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
 }
 
 .wizard__cta {

@@ -1,0 +1,140 @@
+.landing-nav {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem 0;
+}
+
+.landing-nav__menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e0e7ff;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.1);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.landing-nav__menu-btn:hover {
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.16);
+}
+
+.landing-nav__menu-btn[aria-expanded='true'] {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.landing-nav__menu-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 20px;
+}
+
+.landing-nav__menu-icon span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: #312e81;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landing-nav__menu-btn[aria-expanded='true'] .landing-nav__menu-icon span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.landing-nav__menu-btn[aria-expanded='true'] .landing-nav__menu-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.landing-nav__menu-btn[aria-expanded='true'] .landing-nav__menu-icon span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.landing-nav__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 41;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(28, 25, 23, 0.35);
+  cursor: pointer;
+}
+
+.landing-nav__panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 42;
+  width: min(18rem, 88vw);
+  height: 100%;
+  padding: 5rem 1.25rem 2rem;
+  background: #fff;
+  border-left: 1px solid #e7e5e4;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.12);
+  animation: landing-nav-slide-in 0.25s ease;
+}
+
+@keyframes landing-nav-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.landing-nav__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-nav__links li + li {
+  margin-top: 0.35rem;
+}
+
+.landing-nav__links button {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-family: inherit;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-align: left;
+  color: #1c1917;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.landing-nav__links button:hover {
+  background: #f5f3ff;
+  color: #4f46e5;
+}
+
+.landing-nav__try {
+  margin-top: 0.5rem !important;
+  text-align: center !important;
+  color: #fff !important;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+}
+
+.landing-nav__try:hover {
+  color: #fff !important;
+  filter: brightness(1.05);
+}

@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { getServerApolloKey } from './lib/apolloEnv.js'
 
 interface Body {
   keywords?: string
@@ -12,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const headerKey = req.headers['x-apollo-key']
   const userKey = typeof headerKey === 'string' ? headerKey : ''
-  const apiKey = userKey || process.env.APOLLO_API_KEY || ''
+  const apiKey = userKey || getServerApolloKey()
 
   if (!apiKey) {
     return res.status(503).json({

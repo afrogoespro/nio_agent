@@ -12,18 +12,29 @@ git remote set-url origin https://github.com/afrogoespro/nio_agent.git
 git push -u origin main
 ```
 
-## 2. Vercel env vars (Resend)
+## 2. Live URL (use this one)
 
-In Vercel → Project → Settings → Environment Variables (Production):
+**Production:** https://outreach-app-mu.vercel.app
 
-| Name | Example |
-|------|---------|
-| `RESEND_API_KEY` | `re_...` from Resend dashboard |
-| `RESEND_FROM_EMAIL` | A verified sender in Resend (e.g. `onboarding@resend.dev` for tests) |
+Older test URLs (`nio`, `nio-fresh`, preview links) may be outdated or password protected. Bookmark the URL above.
 
-Then **Deployments** → … on latest → **Redeploy** (required after adding keys).
+After deploy, hard refresh: `Ctrl + Shift + R`.
 
-## 3. Connect Vercel to GitHub (recommended)
+## 3. Vercel env vars (Resend + Apollo)
+
+In Vercel → **outreach-app** project → Settings → Environment Variables → check **Production**:
+
+| Name | Required for |
+|------|----------------|
+| `RESEND_API_KEY` | Test email on Launch |
+| `RESEND_FROM_EMAIL` | Test email sender |
+| `APOLLO_API_KEY` | **Real leads** on your plan (without this you get the example person) |
+
+Then **Deployments** → … on latest → **Redeploy** (required after adding or changing keys).
+
+Check: open `https://outreach-app-mu.vercel.app/api/integration-status` — should show `"apolloServer": true`.
+
+## 4. Connect Vercel to GitHub (recommended)
 
 Vercel → Project → Settings → Git → Connect **afrogoespro/nio_agent**
 
@@ -33,7 +44,7 @@ Vercel → Project → Settings → Git → Connect **afrogoespro/nio_agent**
 
 Every `git push` will update the live site.
 
-## 4. What a tester should do (~5 min)
+## 5. What a tester should do (~5 min)
 
 1. Open your Vercel URL
 2. **Ok, let's try it**
@@ -46,6 +57,11 @@ Every `git push` will update the live site.
 
 Copy emails still works without Resend.
 
-## 5. Apollo (optional)
+## 6. Apollo troubleshooting
 
-Add `APOLLO_API_KEY` in Vercel or paste key on Launch page.
+If the lead card says **Example** or you see **Jordan Lee**:
+
+1. Confirm `APOLLO_API_KEY` is set for **Production** (not only Preview).
+2. Redeploy after saving the key.
+3. On the live site: **Start over** → build a new plan.
+4. Read the yellow alert on the plan page for the exact reason.

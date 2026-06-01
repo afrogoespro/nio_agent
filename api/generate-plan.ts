@@ -1,6 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { buildOutreachPlan } from '../src/lib/planBuilder'
+import { getServerApolloKey } from './lib/apolloEnv.js'
+import { buildOutreachPlan } from '../src/lib/planBuilder.js'
 import type { WizardInput } from '../src/types/plan'
+
+export const config = {
+  maxDuration: 30,
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -9,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const headerKey = req.headers['x-apollo-key']
   const userKey = typeof headerKey === 'string' ? headerKey : ''
-  const apiKey = userKey || process.env.APOLLO_API_KEY || ''
+  const apiKey = userKey || getServerApolloKey()
 
   const input = req.body as WizardInput
   if (!input?.business?.trim() || !input?.idealCustomer?.trim()) {
@@ -19,7 +24,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const plan = await buildOutreachPlan(input, apiKey)
     return res.status(200).json(plan)
-  } catch {
-    return res.status(500).json({ error: 'Could not build your plan.' })
+  } catch (err) {
+    console.error('generate-plan failed:', err)
+    return res.status(500).json({ error: 'Could not build your plan. Please try again.' })
   }
 }
