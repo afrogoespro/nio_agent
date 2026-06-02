@@ -67,6 +67,8 @@ async function fetchOnePerson(
     ),
   }
   const keywords = buildApolloKeywordSets(normalizedInput.idealCustomer).slice(0, 3)
+  if (keywords.length === 0) keywords.push('business owner')
+
   const locations = pickSearchLocations(
     normalizedInput.customerLocation,
     normalizedInput.yourLocation,
@@ -81,7 +83,7 @@ async function fetchOnePerson(
       attempts.push({ keywords: kw, location, skipTitles: true })
     }
   }
-  attempts.push({ keywords: keywords[0], location: '', skipTitles: true })
+  attempts.push({ keywords: keywords[0] ?? 'business owner', location: '', skipTitles: true })
 
   const MAX_ATTEMPTS = 6
   for (const attempt of attempts.slice(0, MAX_ATTEMPTS)) {

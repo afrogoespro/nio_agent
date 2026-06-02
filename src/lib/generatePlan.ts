@@ -28,11 +28,10 @@ export async function generatePlan(input: WizardInput): Promise<OutreachPlan> {
   const data = await res.json().catch(() => ({}))
 
   if (!res.ok) {
-    const msg =
-      typeof data === 'object' && data && 'error' in data
-        ? String((data as { error: string }).error)
-        : 'Could not build your plan. Please try again.'
-    throw new Error(msg)
+    const payload = data as { error?: string; detail?: string }
+    const msg = payload?.error ?? 'Could not build your plan. Please try again.'
+    const detail = payload?.detail?.trim()
+    throw new Error(detail ? `${msg} (${detail})` : msg)
   }
 
   return data as OutreachPlan

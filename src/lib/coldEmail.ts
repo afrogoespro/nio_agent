@@ -1,5 +1,5 @@
-import type { AgentId, WizardInput } from '../types/plan'
-import { formatOutreachText } from './outreachVoice'
+import type { AgentId, WizardInput } from '../types/plan.js'
+import { formatOutreachText } from './outreachVoice.js'
 
 export interface EmailContext {
   firstName: string

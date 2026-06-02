@@ -25,7 +25,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const plan = await buildOutreachPlan(input, apiKey)
     return res.status(200).json(plan)
   } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
     console.error('generate-plan failed:', err)
-    return res.status(500).json({ error: 'Could not build your plan. Please try again.' })
+    return res.status(500).json({
+      error: 'Could not build your plan. Please try again.',
+      detail,
+    })
   }
 }
