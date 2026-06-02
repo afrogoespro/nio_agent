@@ -6,12 +6,13 @@ import './Landing.css'
 
 interface LandingProps {
   onTry: () => void
+  onPrivacy: () => void
 }
 
-export function Landing({ onTry }: LandingProps) {
+export function Landing({ onTry, onPrivacy }: LandingProps) {
   return (
     <div className="landing">
-      <LandingNav onTry={onTry} />
+      <LandingNav onTry={onTry} onPrivacy={onPrivacy} />
 
       <header className="landing__hero">
         <div className="landing__fold">
@@ -45,6 +46,11 @@ export function Landing({ onTry }: LandingProps) {
         <button type="button" className="landing__cta" onClick={onTry}>
           Ok, let&apos;s try it
         </button>
+        <p className="landing__legal">
+          <button type="button" className="landing__legal-link" onClick={onPrivacy}>
+            Privacy Policy
+          </button>
+        </p>
       </footer>
     </div>
   )

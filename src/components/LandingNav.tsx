@@ -4,9 +4,10 @@ import './LandingNav.css'
 
 interface LandingNavProps {
   onTry: () => void
+  onPrivacy: () => void
 }
 
-export function LandingNav({ onTry }: LandingNavProps) {
+export function LandingNav({ onTry, onPrivacy }: LandingNavProps) {
   const [open, setOpen] = useState(false)
   const menuId = useId()
 
@@ -30,6 +31,11 @@ export function LandingNav({ onTry }: LandingNavProps) {
   function handleTry() {
     close()
     onTry()
+  }
+
+  function handlePrivacy() {
+    close()
+    onPrivacy()
   }
 
   function scrollTo(id: string) {
@@ -74,6 +80,11 @@ export function LandingNav({ onTry }: LandingNavProps) {
               <li>
                 <button type="button" onClick={() => scrollTo('channels')}>
                   Channels
+                </button>
+              </li>
+              <li>
+                <button type="button" onClick={handlePrivacy}>
+                  Privacy
                 </button>
               </li>
               <li>

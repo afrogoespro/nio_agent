@@ -4,6 +4,7 @@ import { Wizard, type WizardDraft } from './components/Wizard'
 import { LoadingState } from './components/LoadingState'
 import { Playbook } from './components/Playbook'
 import { Launch } from './components/Launch'
+import { PrivacyPolicy } from './components/PrivacyPolicy'
 import { generatePlan } from './lib/generatePlan'
 import {
   loadPlanFromSession,
@@ -13,7 +14,7 @@ import {
 import type { OutreachPlan, WizardInput } from './types/plan'
 import './App.css'
 
-type View = 'landing' | 'wizard' | 'loading' | 'plan' | 'launch'
+type View = 'landing' | 'wizard' | 'loading' | 'plan' | 'launch' | 'privacy'
 
 function toDraft(input: WizardInput): WizardDraft {
   return {
@@ -136,5 +137,14 @@ export default function App() {
     )
   }
 
-  return <Landing onTry={() => setView('wizard')} />
+  if (view === 'privacy') {
+    return <PrivacyPolicy onBack={() => setView('landing')} />
+  }
+
+  return (
+    <Landing
+      onTry={() => setView('wizard')}
+      onPrivacy={() => setView('privacy')}
+    />
+  )
 }

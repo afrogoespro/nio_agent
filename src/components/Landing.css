@@ -91,6 +91,26 @@
   color: #e4e4e7;
 }
 
+.landing__legal {
+  margin: 1.5rem 0 0;
+  font-size: 0.875rem;
+}
+
+.landing__legal-link {
+  font-family: inherit;
+  font-size: inherit;
+  color: #a78bfa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.landing__legal-link:hover {
+  color: #c4b5fd;
+}
+
 @media (min-width: 768px) {
   .landing__fold {
     padding: 0.5rem 0 2.5rem;
