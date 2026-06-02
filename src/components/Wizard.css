@@ -138,6 +138,13 @@
   color: #44403c;
 }
 
+.wizard__field-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #4f46e5;
+}
+
 .wizard__input {
   width: 100%;
   font-family: inherit;

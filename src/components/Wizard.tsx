@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { AgentId, WizardInput } from '../types/plan'
 import { DEMO_EXAMPLES, type DemoExample } from '../lib/demoExamples'
-import { normalizeCustomerLocation } from '../lib/searchLocations'
+import {
+  isBroadLocation,
+  normalizeCustomerLocation,
+  normalizeYourLocation,
+} from '../lib/searchLocations'
 import { BrandMark } from './BrandMark'
 import { FlowProgress } from './FlowProgress'
 import type { FlowStage } from './FlowProgress'
@@ -59,7 +63,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
       onComplete({
         business: business.trim(),
         valueProp: valueProp.trim(),
-        yourLocation: yourLocation.trim(),
+        yourLocation: normalizeYourLocation(yourLocation.trim()),
         idealCustomer: idealCustomer.trim(),
         whyTarget: whyTarget.trim(),
         customerLocation: normalizeCustomerLocation(
@@ -244,15 +248,21 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
               className="wizard__input wizard__input--single"
               value={customerLocation}
               onChange={(e) => setCustomerLocation(e.target.value)}
-              placeholder="Austin, Texas (use a city, not just a state)"
+              placeholder="Same city as you, or Austin, Texas"
             />
+            {isBroadLocation(customerLocation) && yourLocation.trim() && (
+              <p className="wizard__field-hint">
+                We will search near {normalizeYourLocation(yourLocation)} instead of a
+                nationwide area.
+              </p>
+            )}
           </div>
         )}
 
         {step === 3 && (
           <div className="wizard__panel">
-            <p className="wizard__step-label">Pick your rep. Then we build your plan.</p>
-            <h1>Who should be your 24/7 rep?</h1>
+            <p className="wizard__step-label">Pick your Neo Rep. Then we build your plan.</p>
+            <h1>Who should be your Neo Rep?</h1>
             <p className="wizard__hint">
               Choose the personality that sounds like you.
             </p>

@@ -17,6 +17,13 @@ export const AGENTS: Agent[] = [
     image: '/agents/agent-warm.png',
   },
   {
+    id: 'relatable',
+    name: 'Relatable & real',
+    tagline: 'Your rep sounds natural, like a real person checking in',
+    sampleSubject: 'Quick thought for you',
+    image: '/agents/agent-relatable.png',
+  },
+  {
     id: 'punchy',
     name: 'Short & punchy',
     tagline: 'Your rep keeps it short and direct',

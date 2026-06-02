@@ -16,12 +16,13 @@ export function Landing({ onTry, onPrivacy }: LandingProps) {
 
       <header className="landing__hero">
         <div className="landing__fold">
+          <p className="landing__eyebrow">Neo · Natural Intelligent Outreach</p>
           <h1 className="landing__headline">
-            A sales rep working for you around the clock.
+            Your Neo Rep works outreach around the clock.
           </h1>
 
           <p className="landing__subhead">
-            We find who to email, write your messages, and map your follow ups.
+            Neo finds who to email, writes your messages, and maps your follow ups.
             Try it free in under five minutes.
           </p>
 
@@ -31,7 +32,7 @@ export function Landing({ onTry, onPrivacy }: LandingProps) {
             </button>
           </div>
 
-          <div className="landing__visual" aria-label="Pick your rep voice">
+          <div className="landing__visual" aria-label="Pick your Neo Rep voice">
             <HeroAgentArc showCaption={false} size="large" />
           </div>
         </div>

@@ -9,7 +9,7 @@ export function BrandMark({ size = 'md' }: BrandMarkProps) {
   return (
     <div className={`brand-mark brand-mark--${size}`} aria-label={BRAND.name}>
       <span className="brand-mark__icon" aria-hidden="true">
-        24
+        N
       </span>
       <div className="brand-mark__text">
         <span className="brand-mark__name">{BRAND.name}</span>

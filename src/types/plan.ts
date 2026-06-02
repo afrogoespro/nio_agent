@@ -1,4 +1,10 @@
-export type AgentId = 'warm' | 'punchy' | 'formal' | 'curious' | 'urgent'
+export type AgentId =
+  | 'warm'
+  | 'relatable'
+  | 'punchy'
+  | 'formal'
+  | 'curious'
+  | 'urgent'
 
 export interface IcpExample {
   source: 'apollo' | 'example'

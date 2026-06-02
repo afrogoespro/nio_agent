@@ -5,9 +5,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  max-width: 52rem;
-  margin: 0 auto;
-  padding: 0.75rem 1.5rem 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.75rem clamp(1.25rem, 4vw, 3rem) 0;
 }
 
 .landing-nav__menu-btn {

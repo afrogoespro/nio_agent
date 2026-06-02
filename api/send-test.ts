@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const from = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
-  const fromLabel = fromName?.trim() || 'AlwaysOn Rep'
+  const fromLabel = fromName?.trim() || 'Neo Rep'
 
   try {
     const response = await fetch('https://api.resend.com/emails', {

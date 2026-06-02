@@ -9,8 +9,8 @@
 .hero-arc {
   margin: 0 auto 1.75rem;
   width: 100%;
-  max-width: 44rem;
-  padding: 0 0.75rem;
+  max-width: min(72rem, 100%);
+  padding: 0 1rem;
 }
 
 .hero-arc__caption {
@@ -27,39 +27,44 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(0.35rem, 2.2vw, 1.1rem);
-  min-height: 10.5rem;
+  gap: clamp(0.25rem, 1.8vw, 1rem);
+  min-height: 11rem;
   margin: 0 auto;
-  padding: 0 0.25rem 0.25rem;
+  padding: 0 0.5rem 0.25rem;
+  width: 100%;
 }
 
 .hero-arc__item {
   display: flex;
-  flex: 0 0 auto;
+  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   gap: 0.45rem;
-  width: clamp(3.75rem, 16vw, 5.25rem);
+  max-width: 6.5rem;
   transition: transform 0.2s ease;
 }
 
-/* Arc: center high, sides step down */
-.hero-arc__item--0,
-.hero-arc__item--4 {
-  transform: translateY(1.85rem);
+/* Six rep arc: outer low, center high */
+.hero-arc__ring .hero-arc__item:nth-child(1),
+.hero-arc__ring .hero-arc__item:nth-child(6) {
+  transform: translateY(2.1rem);
   z-index: 1;
 }
 
-.hero-arc__item--1,
-.hero-arc__item--3 {
-  transform: translateY(0.85rem);
+.hero-arc__ring .hero-arc__item:nth-child(2),
+.hero-arc__ring .hero-arc__item:nth-child(5) {
+  transform: translateY(1rem);
   z-index: 2;
 }
 
-.hero-arc__item--2 {
+.hero-arc__ring .hero-arc__item:nth-child(3),
+.hero-arc__ring .hero-arc__item:nth-child(4) {
   transform: translateY(0);
   z-index: 3;
-  width: clamp(4.25rem, 18vw, 6rem);
+}
+
+.hero-arc__ring .hero-arc__item:nth-child(3) {
+  transform: translateY(-0.15rem) scale(1.06);
 }
 
 .hero-arc__avatar-wrap {
@@ -81,24 +86,17 @@
 
 .hero-arc__avatar {
   display: block;
-  width: clamp(3.25rem, 14vw, 4.5rem);
-  height: clamp(3.25rem, 14vw, 4.5rem);
+  width: clamp(3rem, 11vw, 4.75rem);
+  height: clamp(3rem, 11vw, 4.75rem);
   object-fit: cover;
+  object-position: center 20%;
   border-radius: 50%;
   border: 3px solid #fff;
-}
-
-.hero-arc__item--2 .hero-arc__avatar-wrap {
-  padding: 4px;
-}
-
-.hero-arc__item--2 .hero-arc__avatar {
-  width: clamp(3.75rem, 16vw, 5.25rem);
-  height: clamp(3.75rem, 16vw, 5.25rem);
+  filter: contrast(1.03) saturate(0.92);
 }
 
 .hero-arc__label {
-  font-size: clamp(0.625rem, 2.5vw, 0.6875rem);
+  font-size: clamp(0.5625rem, 2vw, 0.6875rem);
   font-weight: 600;
   color: #57534e;
   text-align: center;
@@ -106,95 +104,50 @@
   white-space: nowrap;
 }
 
-@media (max-width: 400px) {
-  .hero-arc__ring {
-    gap: 0.2rem;
-    min-height: 9rem;
-  }
-
-  .hero-arc__item--0,
-  .hero-arc__item--4 {
-    transform: translateY(1.35rem);
-  }
-
-  .hero-arc__item--1,
-  .hero-arc__item--3 {
-    transform: translateY(0.55rem);
-  }
-}
-
-@media (min-width: 640px) {
-  .hero-arc__ring {
-    gap: 1.15rem;
-    min-height: 11.5rem;
-  }
-
-  .hero-arc__item--0,
-  .hero-arc__item--4 {
-    transform: translateY(2.1rem);
-  }
-
-  .hero-arc__item--1,
-  .hero-arc__item--3 {
-    transform: translateY(1rem);
-  }
-}
-
-/* Landing hero: larger rep avatars */
 .hero-arc--large {
-  max-width: 48rem;
+  max-width: min(80rem, 100%);
 }
 
 .hero-arc--large .hero-arc__ring {
-  gap: clamp(0.5rem, 2.8vw, 1.35rem);
-  min-height: 13.5rem;
+  gap: clamp(0.35rem, 2vw, 1.15rem);
+  min-height: 14rem;
 }
 
 .hero-arc--large .hero-arc__item {
-  width: clamp(4.5rem, 18vw, 6.5rem);
+  max-width: 7.5rem;
 }
 
 .hero-arc--large .hero-arc__avatar {
-  width: clamp(4rem, 17vw, 5.75rem);
-  height: clamp(4rem, 17vw, 5.75rem);
+  width: clamp(3.5rem, 12vw, 5.5rem);
+  height: clamp(3.5rem, 12vw, 5.5rem);
   border-width: 4px;
 }
 
-.hero-arc--large .hero-arc__item--2 {
-  width: clamp(5.25rem, 20vw, 7.5rem);
-}
-
-.hero-arc--large .hero-arc__item--2 .hero-arc__avatar {
-  width: clamp(4.75rem, 19vw, 6.75rem);
-  height: clamp(4.75rem, 19vw, 6.75rem);
-}
-
 .hero-arc--large .hero-arc__label {
-  font-size: clamp(0.6875rem, 2.5vw, 0.8125rem);
+  font-size: clamp(0.625rem, 2vw, 0.8125rem);
 }
 
-.hero-arc--large .hero-arc__item--0,
-.hero-arc--large .hero-arc__item--4 {
-  transform: translateY(2.35rem);
+.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(1),
+.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(6) {
+  transform: translateY(2.65rem);
 }
 
-.hero-arc--large .hero-arc__item--1,
-.hero-arc--large .hero-arc__item--3 {
-  transform: translateY(1.15rem);
+.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(2),
+.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(5) {
+  transform: translateY(1.25rem);
 }
 
-@media (min-width: 640px) {
+.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(3) {
+  transform: translateY(-0.2rem) scale(1.08);
+}
+
+@media (min-width: 900px) {
+  .hero-arc__ring {
+    gap: 1.25rem;
+    min-height: 12.5rem;
+  }
+
   .hero-arc--large .hero-arc__ring {
-    min-height: 15rem;
-  }
-
-  .hero-arc--large .hero-arc__item--0,
-  .hero-arc--large .hero-arc__item--4 {
-    transform: translateY(2.65rem);
-  }
-
-  .hero-arc--large .hero-arc__item--1,
-  .hero-arc--large .hero-arc__item--3 {
-    transform: translateY(1.25rem);
+    min-height: 15.5rem;
   }
 }

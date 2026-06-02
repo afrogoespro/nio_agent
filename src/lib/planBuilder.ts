@@ -1,7 +1,11 @@
 import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
 import { apolloDisplayName, searchApolloPeople, type ApolloPerson } from './apolloSearch.js'
 import { writeColdOpeningEmail } from './coldEmail.js'
-import { normalizeCustomerLocation, pickSearchLocations } from './searchLocations.js'
+import {
+  normalizeCustomerLocation,
+  normalizeYourLocation,
+  pickSearchLocations,
+} from './searchLocations.js'
 import { formatEmail, formatOutreachText } from './outreachVoice.js'
 
 interface LeadContext {
@@ -20,13 +24,40 @@ export async function buildOutreachPlan(
   input: WizardInput,
   apolloApiKey: string,
 ): Promise<OutreachPlan> {
-  let apolloNote: string | null = null
-  let person: ApolloPerson | null = null
+  const normalizedInput = normalizeWizardInput(input)
 
-  if (!apolloApiKey.trim()) {
+  try {
+    return await buildOutreachPlanCore(normalizedInput, apolloApiKey)
+  } catch (err) {
+    console.error('buildOutreachPlan failed:', err)
+    return buildOutreachPlanCore(normalizedInput, '', {
+      apolloNote:
+        'We hit a snag finding a live lead. Here is a demo plan so you can still review the emails.',
+    })
+  }
+}
+
+function normalizeWizardInput(input: WizardInput): WizardInput {
+  const yourLocation = normalizeYourLocation(input.yourLocation)
+  return {
+    ...input,
+    yourLocation,
+    customerLocation: normalizeCustomerLocation(input.customerLocation, yourLocation),
+  }
+}
+
+async function buildOutreachPlanCore(
+  input: WizardInput,
+  apolloApiKey: string,
+  overrides?: { apolloNote?: string | null; person?: ApolloPerson | null },
+): Promise<OutreachPlan> {
+  let apolloNote: string | null = overrides?.apolloNote ?? null
+  let person: ApolloPerson | null = overrides?.person ?? null
+
+  if (!overrides && !apolloApiKey.trim()) {
     apolloNote =
       'Apollo key not found on server. Add APOLLO_API_KEY in Vercel, redeploy, then Start over.'
-  } else {
+  } else if (!overrides) {
     const result = await fetchOnePerson(input, apolloApiKey)
     if (result.ok) {
       person = result.person
@@ -59,20 +90,10 @@ async function fetchOnePerson(
   input: WizardInput,
   apiKey: string,
 ): Promise<ApolloFetchResult> {
-  const normalizedInput = {
-    ...input,
-    customerLocation: normalizeCustomerLocation(
-      input.customerLocation,
-      input.yourLocation,
-    ),
-  }
-  const keywords = buildApolloKeywordSets(normalizedInput.idealCustomer).slice(0, 3)
+  const keywords = buildApolloKeywordSets(input.idealCustomer).slice(0, 3)
   if (keywords.length === 0) keywords.push('business owner')
 
-  const locations = pickSearchLocations(
-    normalizedInput.customerLocation,
-    normalizedInput.yourLocation,
-  )
+  const locations = pickSearchLocations(input.customerLocation, input.yourLocation)
 
   type Attempt = { keywords: string; location: string; skipTitles: boolean }
   const attempts: Attempt[] = []

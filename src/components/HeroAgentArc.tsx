@@ -3,6 +3,7 @@ import './HeroAgentArc.css'
 
 const SHORT_LABELS: Record<string, string> = {
   warm: 'Warm',
+  relatable: 'Relatable',
   punchy: 'Punchy',
   formal: 'Formal',
   curious: 'Curious',
@@ -27,18 +28,15 @@ export function HeroAgentArc({
         <p className="hero-arc__caption">Pick your rep&apos;s voice</p>
       )}
       <div className="hero-arc__ring">
-        {AGENTS.map((agent, index) => (
-          <div
-            key={agent.id}
-            className={`hero-arc__item hero-arc__item--${index}`}
-          >
+        {AGENTS.map((agent) => (
+          <div key={agent.id} className="hero-arc__item">
             <div className="hero-arc__avatar-wrap">
               <img
                 className="hero-arc__avatar"
                 src={agent.image}
                 alt=""
-                width={index === 2 ? (size === 'large' ? 108 : 84) : size === 'large' ? 92 : 68}
-                height={index === 2 ? (size === 'large' ? 108 : 84) : size === 'large' ? 92 : 68}
+                width={size === 'large' ? 88 : 72}
+                height={size === 'large' ? 88 : 72}
                 loading="eager"
                 decoding="async"
               />

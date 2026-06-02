@@ -1,6 +1,8 @@
-/** Product name + shared voice — “sales rep working for you 24/7, easy setup”. */
+/** Product name + shared voice — Neo (Natural Intelligent Outreach). */
 export const BRAND = {
-  name: 'AlwaysOn Rep',
-  shortTagline: 'Your sales rep, 24/7',
+  name: 'Neo',
+  repName: 'Neo Rep',
+  expansion: 'Natural Intelligent Outreach',
+  shortTagline: 'Natural Intelligent Outreach',
   setupLine: 'Easy setup — live in under 5 minutes',
 } as const

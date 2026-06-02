@@ -1,7 +1,8 @@
 .channels {
-  max-width: 40rem;
+  width: 100%;
+  max-width: 56rem;
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 3rem clamp(1.25rem, 4vw, 3rem);
   text-align: center;
   background: #fff;
   border-top: 1px solid #e7e5e4;

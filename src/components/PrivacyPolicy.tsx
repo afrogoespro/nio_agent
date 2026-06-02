@@ -20,7 +20,8 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         <p className="privacy__updated">Last updated: June 2, 2026</p>
 
         <p>
-          AlwaysOn Rep (&quot;we,&quot; &quot;us&quot;) helps you build outreach plans. This
+          Neo (&quot;we,&quot; &quot;us&quot;) provides Natural Intelligent Outreach to help you
+          build outreach plans. This
           policy explains what we collect, how we use it, and your choices.
         </p>
 
@@ -103,7 +104,7 @@ export function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <h2>Contact</h2>
           <p>
             Questions about this policy? Email{' '}
-            <a href="mailto:support@alwaysonrep.com">support@alwaysonrep.com</a> (update this
+            <a href="mailto:support@neorep.com">support@neorep.com</a> (update this
             address to your real support email).
           </p>
         </section>

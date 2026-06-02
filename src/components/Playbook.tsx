@@ -154,9 +154,9 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
           <FlowProgress current={4} />
         </div>
         {plan.apolloNote && plan.icpExample.source === 'example' && (
-          <div className="playbook__apollo-alert" role="alert">
-            <strong>Still showing the example person.</strong> {plan.apolloNote}{' '}
-            After fixing, click Start over and build a new plan.
+          <div className="playbook__apollo-alert" role="status">
+            <strong>Demo lead for this run.</strong> {plan.apolloNote} Your emails
+            below still work for a test walkthrough.
           </div>
         )}
 

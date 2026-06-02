@@ -8,21 +8,20 @@ export interface EmailContext {
   place: string
 }
 
-const CTA = 'Would you be open to a quick chat this week?'
-const MAX_WORDS = 140
+const CTA = 'Open to a quick chat this week?'
+const MAX_WORDS = 75
 
 /** User facing spec for future OpenAI wiring. */
 export const COLD_EMAIL_BRIEF = {
   goal: 'Start a conversation or get a reply',
-  framework: 'PAS or AIDA',
+  framework: 'Short PAS style',
   maxWords: MAX_WORDS,
   cta: CTA,
   readingLevel: '5th grade',
   rules: [
-    'Clear and conversational. No sales fluff or exaggerated claims.',
-    'First line mentions something relevant about the recipient business or role.',
-    'Personalize naturally. Skip generic compliments.',
-    'Simple CTA. Avoid robotic phrasing and overly formal greetings.',
+    'Keep the first outreach email very short (about 4 sentences).',
+    'Plain talk. No sales fluff.',
+    'Mention their world in line one. Offer + CTA in the last lines.',
   ],
 } as const
 
@@ -31,153 +30,181 @@ export function writeColdOpeningEmail(
   input: WizardInput,
   ctx: EmailContext,
 ): { subject: string; body: string } {
-  const framework = pickFramework(agentId)
-  const draft =
-    framework === 'PAS'
-      ? buildPasEmail(agentId, input, ctx)
-      : buildAidaEmail(agentId, input, ctx)
-
-  return formatEmailDraft(draft)
+  return formatEmailDraft(buildShortEmail(agentId, input, ctx))
 }
 
-function pickFramework(agentId: AgentId): 'PAS' | 'AIDA' {
-  if (agentId === 'punchy' || agentId === 'curious') return 'AIDA'
-  return 'PAS'
-}
-
-function buildPasEmail(
+function buildShortEmail(
   agentId: AgentId,
   input: WizardInput,
   ctx: EmailContext,
 ): { subject: string; body: string } {
-  const service = shorten(input.business)
-  const edge = shorten(input.valueProp)
-  const pain = shorten(input.whyTarget)
   const industry = guessIndustry(input)
-  const opener = businessOpener(ctx, input)
-  const greeting = greetingFor(agentId, ctx.firstName)
-  const signOff = signOffFor(agentId)
+  const pain = plainPain(input.whyTarget)
+  const offer = plainOffer(input.valueProp)
+  const peers = peersLikeYou(industry)
 
-  const problem =
-    agentId === 'formal'
-      ? `Many ${industry} leaders tell us ${pain.toLowerCase()}`
-      : `A lot of ${titleLabel(ctx.title)}s deal with this: ${pain.toLowerCase()}`
-
-  const solution =
-    agentId === 'punchy'
-      ? `${service}. ${edge}.`
-      : `We help with ${service.toLowerCase()}. ${edge}`
-
-  const body = [
-    greeting,
+  const core = [
+    greetingFor(agentId, ctx.firstName),
     '',
-    opener,
+    hookLine(agentId, ctx, industry, pain, peers),
     '',
-    problem,
+    offerLine(agentId, input, offer),
     '',
-    solution,
+    ctaLine(agentId),
     '',
-    CTA,
-    '',
-    signOff,
+    signOffFor(agentId),
   ].join('\n')
 
-  return { subject: subjectFor(agentId, ctx, input), body }
+  return { subject: subjectFor(agentId, ctx, input), body: core }
 }
 
-function buildAidaEmail(
+function hookLine(
   agentId: AgentId,
-  input: WizardInput,
   ctx: EmailContext,
-): { subject: string; body: string } {
-  const service = shorten(input.business)
-  const edge = shorten(input.valueProp)
-  const pain = shorten(input.whyTarget)
-  const greeting = greetingFor(agentId, ctx.firstName)
-  const signOff = signOffFor(agentId)
-  const opener = businessOpener(ctx, input)
+  _industry: string,
+  pain: string,
+  peers: string,
+): string {
+  const company = displayCompany(ctx)
 
   if (agentId === 'curious') {
-    const body = [
-      greeting,
-      '',
-      opener,
-      '',
-      `We work on ${service.toLowerCase()}. I am curious how you handle ${pain.toLowerCase()} today.`,
-      '',
-      `Happy to share what has worked for other ${guessIndustry(input)} if it helps.`,
-      '',
-      CTA,
-      '',
-      signOff,
-    ].join('\n')
-    return { subject: subjectFor(agentId, ctx, input), body }
+    return `Quick question about ${company} — I keep seeing ${peers} struggle with ${pain}. How are you handling that?`
   }
-
-  // punchy AIDA
-  const body = [
-    greeting,
-    '',
-    opener,
-    '',
-    `${service}. ${edge}`,
-    '',
-    CTA,
-    '',
-    signOff,
-  ].join('\n')
-
-  return { subject: subjectFor(agentId, ctx, input), body }
+  if (agentId === 'punchy') {
+    return `I notice ${peers} often lose out when ${pain}.`
+  }
+  if (agentId === 'urgent') {
+    return `I am reaching out to a few ${peers} near you. Many are dealing with ${pain}.`
+  }
+  if (agentId === 'formal') {
+    return `I work with ${peers}. A common issue is ${pain}.`
+  }
+  if (agentId === 'relatable') {
+    return `I have been talking with a few ${peers}. A lot of them mention ${pain}.`
+  }
+  return `I notice a lot of ${peers} like ${company} are dealing with ${pain}.`
 }
 
-function businessOpener(ctx: EmailContext, input: WizardInput): string {
-  const company = ctx.company && ctx.company !== 'a local business' && ctx.company !== 'a sample business'
-    ? ctx.company
-    : companyHint(input.idealCustomer)
-  const place = ctx.place ? ` in ${ctx.place}` : ''
-  const title = ctx.title || 'leader'
+function offerLine(agentId: AgentId, input: WizardInput, offer: string): string {
+  const whatWeDo = plainWhatWeDo(input.business)
 
-  const industry = guessIndustry(input)
-
-  if (industry === 'dental') {
-    return `I saw you are the ${title} at ${company}${place}. Growing a dental office takes steady new patient flow.`
-  }
-  if (industry === 'restaurants') {
-    return `I noticed ${company}${place} and how much online presence matters for reservations and walk ins.`
-  }
-  if (industry === 'pet care') {
-    return `I saw you work as ${title} at ${company}${place}. Busy teams often need reliable help with daily routines.`
+  const lines: Record<AgentId, string> = {
+    warm: `We built something to help: ${whatWeDo}. ${offer}.`,
+    relatable: `We help with ${whatWeDo} — ${offer}.`,
+    punchy: `We built ${whatWeDo} — ${offer}.`,
+    formal: `We offer ${whatWeDo}. ${offer}.`,
+    curious: `We built something to help: ${whatWeDo}. ${offer}.`,
+    urgent: `We built something to help: ${whatWeDo}. ${offer}.`,
   }
 
-  return `I came across ${company}${place} and your work as ${title}. It looks like ${shorten(input.whyTarget, 70).toLowerCase()}.`
+  return lines[agentId]
+}
+
+function ctaLine(agentId: AgentId): string {
+  const lines: Record<AgentId, string> = {
+    warm: CTA,
+    relatable: 'Would a quick chat this week work?',
+    punchy: 'Worth a quick chat?',
+    formal: CTA,
+    curious: CTA,
+    urgent: 'Reply if you want to talk this week.',
+  }
+
+  return lines[agentId]
+}
+
+function displayCompany(ctx: EmailContext): string {
+  if (
+    ctx.company &&
+    ctx.company !== 'a local business' &&
+    ctx.company !== 'a sample business' &&
+    !ctx.company.toLowerCase().includes('restaurant') &&
+    ctx.company.length > 3
+  ) {
+    return ctx.company
+  }
+  return 'your place'
+}
+
+function peersLikeYou(industry: string): string {
+  if (industry === 'restaurants') return 'restaurants like yours'
+  if (industry === 'dental') return 'dental offices like yours'
+  if (industry === 'pet care') return 'teams like yours'
+  return 'businesses like yours'
+}
+
+function plainPain(whyTarget: string): string {
+  const t = whyTarget.trim().replace(/^(because|since)\s+/i, '')
+  return shorten(lowerFirst(t), 90)
+}
+
+function plainOffer(valueProp: string): string {
+  return shorten(lowerFirst(valueProp.trim()), 70)
+}
+
+function plainWhatWeDo(business: string): string {
+  let t = business.trim()
+  t = t.replace(/^(i|we)\s+(help|build|run|make|do)\s+/i, '')
+  t = t.replace(/^(i|we)\s+/i, '')
+  t = t.replace(/\.$/, '')
+  return shorten(lowerFirst(t), 60)
+}
+
+function lowerFirst(text: string): string {
+  if (!text) return text
+  return text.charAt(0).toLowerCase() + text.slice(1)
 }
 
 function subjectFor(agentId: AgentId, ctx: EmailContext, input: WizardInput): string {
   const company =
     ctx.company && !ctx.company.startsWith('a ')
       ? ctx.company.split(' ').slice(0, 3).join(' ')
-      : guessIndustry(input)
+      : guessIndustryLabel(input)
 
   const subjects: Record<AgentId, string> = {
-    warm: `Quick idea for ${company}`,
-    punchy: `${ctx.firstName}, worth a quick look?`,
-    formal: `Note for ${ctx.firstName} at ${company}`,
-    curious: `Question about ${company}`,
-    urgent: `${ctx.firstName}, quick note about ${company}`,
+    warm: `Quick note for ${ctx.firstName}`,
+    relatable: `Quick thought, ${ctx.firstName}`,
+    punchy: `${ctx.firstName}, quick idea`,
+    formal: `Hello ${ctx.firstName}`,
+    curious: `Question for ${ctx.firstName}`,
+    urgent: `${ctx.firstName}, quick note`,
   }
 
+  void company
   return subjects[agentId]
 }
 
+function guessIndustryLabel(input: WizardInput): string {
+  const industry = guessIndustry(input)
+  if (industry === 'restaurants') return 'your restaurant'
+  if (industry === 'dental') return 'your office'
+  return 'your business'
+}
+
 function greetingFor(agentId: AgentId, firstName: string): string {
-  if (agentId === 'formal') return `Hi ${firstName},`
-  return `Hey ${firstName},`
+  const greetings: Record<AgentId, string> = {
+    warm: `Hey ${firstName},`,
+    relatable: `Hey ${firstName},`,
+    punchy: `Hey ${firstName},`,
+    formal: `Hi ${firstName},`,
+    curious: `Hey ${firstName},`,
+    urgent: `Hey ${firstName},`,
+  }
+
+  return greetings[agentId]
 }
 
 function signOffFor(agentId: AgentId): string {
-  if (agentId === 'formal') return 'Thank you,\n[Your name]'
-  if (agentId === 'warm') return 'Thanks,\n[Your name]'
-  return '[Your name]'
+  const signOffs: Record<AgentId, string> = {
+    warm: '[Your name]',
+    relatable: '[Your name]',
+    punchy: '[Your name]',
+    formal: 'Thank you,\n[Your name]',
+    curious: '[Your name]',
+    urgent: '[Your name]',
+  }
+
+  return signOffs[agentId]
 }
 
 function guessIndustry(input: WizardInput): string {
@@ -188,21 +215,6 @@ function guessIndustry(input: WizardInput): string {
   if (text.includes('dog') || text.includes('pet')) return 'pet care'
   if (text.includes('web') || text.includes('website')) return 'local businesses'
   return 'local businesses'
-}
-
-function companyHint(idealCustomer: string): string {
-  const lower = idealCustomer.toLowerCase()
-  if (lower.includes('dental') || lower.includes('dentist')) return 'a local dental office'
-  if (lower.includes('restaurant') || lower.includes('cafe')) return 'a local restaurant'
-  return 'a local business like yours'
-}
-
-function titleLabel(title: string): string {
-  const t = title.trim().toLowerCase()
-  if (t.includes('owner')) return 'owner'
-  if (t.includes('manager')) return 'manager'
-  if (t.includes('dentist')) return 'dentist'
-  return 'leader'
 }
 
 function shorten(text: string, max = 100): string {

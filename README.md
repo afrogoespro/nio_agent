@@ -1,6 +1,6 @@
-# AlwaysOn Rep
+# Neo
 
-A simple outreach app — your 24/7 sales rep. Tell us about you, who to target, get a plan, launch.
+Natural Intelligent Outreach (NIO) — your Neo Rep finds who to email, writes messages, and maps follow-ups. Tell us about you, who to target, get a plan, launch.
 
 ## Local dev
 
