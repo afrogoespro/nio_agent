@@ -10,9 +10,14 @@ export interface ApolloPerson {
   organization?: { name?: string }
 }
 
-export type ApolloSearchResult =
-  | { ok: true; people: ApolloPerson[] }
-  | { ok: false; reason: string }
+export type ApolloSearchOk = { ok: true; people: ApolloPerson[] }
+export type ApolloSearchFail = { ok: false; reason: string }
+
+export type ApolloSearchResult = ApolloSearchOk | ApolloSearchFail
+
+export function apolloSearchReason(result: ApolloSearchFail): string {
+  return result.reason
+}
 
 const APOLLO_SEARCH_URL = 'https://api.apollo.io/api/v1/mixed_people/api_search'
 const SEARCH_TIMEOUT_MS = 4000

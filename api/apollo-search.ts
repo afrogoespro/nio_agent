@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { searchApolloPeople } from '../src/lib/apolloSearch.js'
+import { apolloSearchReason, searchApolloPeople } from '../src/lib/apolloSearch.js'
 import { getServerApolloKey } from './lib/apolloEnv.js'
 
 interface Body {
@@ -29,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const result = await searchApolloPeople(apiKey, keywords.trim(), location?.trim() ?? '')
 
-  if (!result.ok) {
-    return res.status(502).json({ error: result.reason })
+  if (result.ok === false) {
+    return res.status(502).json({ error: apolloSearchReason(result) })
   }
 
   return res.status(200).json({

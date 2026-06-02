@@ -1,5 +1,10 @@
 import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
-import { apolloDisplayName, searchApolloPeople, type ApolloPerson } from './apolloSearch.js'
+import {
+  apolloDisplayName,
+  apolloSearchReason,
+  searchApolloPeople,
+  type ApolloPerson,
+} from './apolloSearch.js'
 import { writeColdOpeningEmail } from './coldEmail.js'
 import {
   normalizeCustomerLocation,
@@ -16,9 +21,13 @@ interface LeadContext {
   place: string
 }
 
-type ApolloFetchResult =
-  | { ok: true; person: ApolloPerson }
-  | { ok: false; reason: string }
+type ApolloFetchOk = { ok: true; person: ApolloPerson }
+type ApolloFetchFail = { ok: false; reason: string }
+type ApolloFetchResult = ApolloFetchOk | ApolloFetchFail
+
+function apolloFetchReason(result: ApolloFetchFail): string {
+  return result.reason
+}
 
 export async function buildOutreachPlan(
   input: WizardInput,
@@ -62,7 +71,7 @@ async function buildOutreachPlanCore(
     if (result.ok) {
       person = result.person
     } else {
-      apolloNote = result.reason
+      apolloNote = apolloFetchReason(result)
     }
   }
 
@@ -166,8 +175,14 @@ async function apolloSearch(
   skipTitles: boolean,
 ): Promise<ApolloFetchResult> {
   const result = await searchApolloPeople(apiKey, keywords, location, { skipTitles })
-  if (!result.ok) return result
-  return { ok: true, person: result.people[0] }
+  if (result.ok === false) {
+    return { ok: false, reason: apolloSearchReason(result) }
+  }
+  const person = result.people[0]
+  if (!person) {
+    return { ok: false, reason: 'No leads found for these keywords.' }
+  }
+  return { ok: true, person }
 }
 
 function mapApolloToLead(person: ApolloPerson, input: WizardInput): IcpExample {

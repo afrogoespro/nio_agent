@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { getServerApolloKey } from './lib/apolloEnv.js'
 import { buildOutreachPlan } from '../src/lib/planBuilder.js'
-import type { WizardInput } from '../src/types/plan'
+import type { WizardInput } from '../src/types/plan.js'
 
 export const config = {
   maxDuration: 30,
