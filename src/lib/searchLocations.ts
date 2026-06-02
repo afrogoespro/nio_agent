@@ -66,7 +66,7 @@ export function pickSearchLocations(customerLocation: string, yourLocation: stri
     for (const v of expandLocation(base)) add(v)
   }
 
-  return locations.sort((a, b) => locationScore(b) - locationScore(a))
+  return locations.sort((a, b) => locationScore(b) - locationScore(a)).slice(0, 3)
 }
 
 function locationScore(location: string): number {

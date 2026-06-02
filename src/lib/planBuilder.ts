@@ -66,24 +66,33 @@ async function fetchOnePerson(
       input.yourLocation,
     ),
   }
-  const keywordSets = buildApolloKeywordSets(normalizedInput.idealCustomer)
+  const keywords = buildApolloKeywordSets(normalizedInput.idealCustomer).slice(0, 3)
   const locations = pickSearchLocations(
     normalizedInput.customerLocation,
     normalizedInput.yourLocation,
   )
 
-  for (const keywords of keywordSets) {
-    for (const location of locations.length ? locations : ['']) {
-      const strict = await apolloSearch(apiKey, keywords, location, false)
-      if (strict.ok) return strict
+  type Attempt = { keywords: string; location: string; skipTitles: boolean }
+  const attempts: Attempt[] = []
 
-      const relaxed = await apolloSearch(apiKey, keywords, location, true)
-      if (relaxed.ok) return relaxed
+  for (const kw of keywords) {
+    for (const location of locations.length ? locations : ['']) {
+      attempts.push({ keywords: kw, location, skipTitles: false })
+      attempts.push({ keywords: kw, location, skipTitles: true })
     }
   }
+  attempts.push({ keywords: keywords[0], location: '', skipTitles: true })
 
-  const anywhere = await apolloSearch(apiKey, keywordSets[0], '', true)
-  if (anywhere.ok) return anywhere
+  const MAX_ATTEMPTS = 6
+  for (const attempt of attempts.slice(0, MAX_ATTEMPTS)) {
+    const result = await apolloSearch(
+      apiKey,
+      attempt.keywords,
+      attempt.location,
+      attempt.skipTitles,
+    )
+    if (result.ok) return result
+  }
 
   return {
     ok: false,

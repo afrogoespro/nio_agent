@@ -15,7 +15,7 @@ export type ApolloSearchResult =
   | { ok: false; reason: string }
 
 const APOLLO_SEARCH_URL = 'https://api.apollo.io/api/v1/mixed_people/api_search'
-const SEARCH_TIMEOUT_MS = 6000
+const SEARCH_TIMEOUT_MS = 4000
 
 export async function searchApolloPeople(
   apiKey: string,

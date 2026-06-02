@@ -67,6 +67,8 @@ export default function App() {
   }, [view, plan])
 
   async function handleWizardComplete(wizardInput: WizardInput) {
+    clearPlanSession()
+    setPlan(null)
     setInput(wizardInput)
     setWizardResume(toDraft(wizardInput))
     setError(null)
