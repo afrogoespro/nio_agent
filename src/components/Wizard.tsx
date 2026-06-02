@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { AgentId, WizardInput } from '../types/plan'
+import { DEMO_EXAMPLES, type DemoExample } from '../lib/demoExamples'
+import { normalizeCustomerLocation } from '../lib/searchLocations'
 import { BrandMark } from './BrandMark'
 import { FlowProgress } from './FlowProgress'
 import type { FlowStage } from './FlowProgress'
@@ -60,7 +62,10 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
         yourLocation: yourLocation.trim(),
         idealCustomer: idealCustomer.trim(),
         whyTarget: whyTarget.trim(),
-        customerLocation: customerLocation.trim(),
+        customerLocation: normalizeCustomerLocation(
+          customerLocation.trim(),
+          yourLocation.trim(),
+        ),
         agentId,
       })
     }
@@ -114,6 +119,17 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
     else onBack()
   }
 
+  function applyExample(example: DemoExample) {
+    setBusiness(example.business)
+    setValueProp(example.valueProp)
+    setYourLocation(example.yourLocation)
+    setIdealCustomer(example.idealCustomer)
+    setWhyTarget(example.whyTarget)
+    setCustomerLocation(example.customerLocation)
+    setAgentId(example.agentId)
+    setStep(1)
+  }
+
   return (
     <div className="wizard">
       <header className="wizard__header">
@@ -137,6 +153,21 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
             <p className="wizard__hint">
               A few quick questions. Takes about a minute.
             </p>
+            <div className="wizard__examples">
+              <p className="wizard__examples-label">Try an example</p>
+              <div className="wizard__examples-list">
+                {DEMO_EXAMPLES.map((example) => (
+                  <button
+                    key={example.id}
+                    type="button"
+                    className="wizard__example-btn"
+                    onClick={() => applyExample(example)}
+                  >
+                    {example.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <label className="wizard__label" htmlFor="business">
               What does your business do?
             </label>
@@ -213,7 +244,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
               className="wizard__input wizard__input--single"
               value={customerLocation}
               onChange={(e) => setCustomerLocation(e.target.value)}
-              placeholder="Texas, or anywhere in the US"
+              placeholder="Austin, Texas (use a city, not just a state)"
             />
           </div>
         )}

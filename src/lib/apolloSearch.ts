@@ -21,6 +21,7 @@ export async function searchApolloPeople(
   apiKey: string,
   keywords: string,
   location: string,
+  options?: { skipTitles?: boolean },
 ): Promise<ApolloSearchResult> {
   try {
     const params = new URLSearchParams()
@@ -32,8 +33,10 @@ export async function searchApolloPeople(
       params.append('person_locations[]', location.trim())
     }
 
-    for (const title of guessTitles(keywords)) {
-      params.append('person_titles[]', title)
+    if (!options?.skipTitles) {
+      for (const title of guessTitles(keywords)) {
+        params.append('person_titles[]', title)
+      }
     }
 
     const controller = new AbortController()

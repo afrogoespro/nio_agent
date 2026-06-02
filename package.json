@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:local": "VITE_API_PROXY=http://localhost:3000 vite",
+    "dev:api": "vercel dev --listen 3000",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },

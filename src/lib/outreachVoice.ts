@@ -18,6 +18,12 @@ export const OUTREACH_VOICE = {
 export const OUTREACH_SYSTEM_PROMPT = `You write cold email outreach for small business owners.
 ${OUTREACH_VOICE.tone}
 Reading level: ${OUTREACH_VOICE.readingLevel}.
+Goal: Start a conversation or get a reply.
+Framework: PAS (Problem, Agitate, Solution) or AIDA (Attention, Interest, Desire, Action).
+The first line must mention something relevant about the recipient business or role. No generic compliments.
+Keep the full email under 140 words.
+CTA: "Would you be open to a quick chat this week?" or similar simple ask.
+Output: subject line plus email body in plain text.
 ${OUTREACH_VOICE.rules.map((r) => `- ${r}`).join('\n')}
 Return valid JSON only. Every string in emails and subjects must follow these rules.`
 

@@ -1,5 +1,7 @@
 import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
 import { apolloDisplayName, searchApolloPeople, type ApolloPerson } from './apolloSearch.js'
+import { writeColdOpeningEmail } from './coldEmail.js'
+import { normalizeCustomerLocation, pickSearchLocations } from './searchLocations.js'
 import { formatEmail, formatOutreachText } from './outreachVoice.js'
 
 interface LeadContext {
@@ -57,38 +59,81 @@ async function fetchOnePerson(
   input: WizardInput,
   apiKey: string,
 ): Promise<ApolloFetchResult> {
-  const keywords = buildApolloKeywords(input)
-  const location = input.customerLocation.trim() || input.yourLocation.trim()
+  const normalizedInput = {
+    ...input,
+    customerLocation: normalizeCustomerLocation(
+      input.customerLocation,
+      input.yourLocation,
+    ),
+  }
+  const keywordSets = buildApolloKeywordSets(normalizedInput.idealCustomer)
+  const locations = pickSearchLocations(
+    normalizedInput.customerLocation,
+    normalizedInput.yourLocation,
+  )
 
-  const withLocation = location
-    ? await apolloSearch(apiKey, keywords, location)
-    : null
+  for (const keywords of keywordSets) {
+    for (const location of locations.length ? locations : ['']) {
+      const strict = await apolloSearch(apiKey, keywords, location, false)
+      if (strict.ok) return strict
 
-  if (withLocation?.ok) return withLocation
+      const relaxed = await apolloSearch(apiKey, keywords, location, true)
+      if (relaxed.ok) return relaxed
+    }
+  }
 
-  const broader = await apolloSearch(apiKey, keywords, '')
-  if (broader.ok) return broader
+  const anywhere = await apolloSearch(apiKey, keywordSets[0], '', true)
+  if (anywhere.ok) return anywhere
 
   return {
     ok: false,
     reason:
-      broader.reason ??
-      withLocation?.reason ??
-      'Apollo returned no people for this search. Try simpler keywords or a wider area.',
+      'No leads found. Use a city like Austin, Texas (not just a state) and a short job title like dental office owner.',
   }
 }
 
-function buildApolloKeywords(input: WizardInput): string {
-  const parts = [input.idealCustomer.trim(), input.business.trim()].filter(Boolean)
-  return parts.join(' ').slice(0, 120)
+function buildApolloKeywordSets(idealCustomer: string): string[] {
+  const primary = simplifyIdealCustomer(idealCustomer)
+  const lower = primary.toLowerCase()
+  const fallbacks: string[] = [primary]
+
+  if (lower.includes('dental')) {
+    fallbacks.push('dentist', 'dental practice owner', 'dental office owner')
+  } else if (lower.includes('restaurant')) {
+    fallbacks.push('restaurant owner', 'restaurant manager')
+  } else if (lower.includes('office manager')) {
+    fallbacks.push('office manager', 'operations manager')
+  } else if (lower.includes('owner')) {
+    fallbacks.push('business owner', 'founder')
+  }
+
+  return [...new Set(fallbacks)]
+}
+
+function simplifyIdealCustomer(text: string): string {
+  const trimmed = text.trim()
+  const lower = trimmed.toLowerCase()
+
+  if (lower.includes('dental') && lower.includes('owner')) return 'dental office owner'
+  if (lower.includes('dentist')) return 'dentist'
+  if (lower.includes('restaurant') && lower.includes('manager')) return 'restaurant manager'
+  if (lower.includes('restaurant') && lower.includes('owner')) return 'restaurant owner'
+  if (lower.includes('cafe') && lower.includes('owner')) return 'cafe owner'
+  if (lower.includes('property') && lower.includes('manager')) return 'property manager'
+  if (lower.includes('office manager')) return 'office manager'
+  if (lower.includes('owner')) return 'business owner'
+
+  const firstSentence = trimmed.split(/[.!?]/)[0]?.trim() ?? trimmed
+  return firstSentence.replace(/\s+(in|near|around|with)\s+[\w\s,'-]+$/i, '').trim() || trimmed
 }
 
 async function apolloSearch(
   apiKey: string,
   keywords: string,
   location: string,
+  skipTitles: boolean,
 ): Promise<ApolloFetchResult> {
-  const result = await searchApolloPeople(apiKey, keywords, location)
+  const result = await searchApolloPeople(apiKey, keywords, location, { skipTitles })
   if (!result.ok) return result
   return { ok: true, person: result.people[0] }
 }
@@ -153,81 +198,7 @@ function writeOpeningEmail(
   input: WizardInput,
   ctx: LeadContext,
 ): { subject: string; body: string } {
-  const b = input.business.trim()
-  const edge = input.valueProp.trim()
-  const atCompany = ctx.company ? ` at ${ctx.company}` : ''
-  const inPlace = ctx.place ? ` in ${ctx.place}` : ''
-
-  const intros: Record<AgentId, { subject: string; body: string }> = {
-    warm: {
-      subject: `Hey ${ctx.firstName}, quick hello`,
-      body: `Hey ${ctx.firstName},
-
-I wanted to reach out person to person.
-
-${b}
-
-I found you${atCompany}${inPlace}. ${edge}
-
-I would love to chat more about this. Are you open to a short call this week?
-
-Thanks,
-[Your name]`,
-    },
-    punchy: {
-      subject: `Hey ${ctx.firstName}`,
-      body: `Hey ${ctx.firstName},
-
-${b}
-
-I saw you${atCompany}${inPlace}.
-
-Can we talk for a few minutes this week?
-
-[Your name]`,
-    },
-    formal: {
-      subject: `Hello ${ctx.firstName}`,
-      body: `Hi ${ctx.firstName},
-
-My name is [Your name].
-
-${b}
-
-I came across you${atCompany}${inPlace}. ${edge}
-
-I would appreciate a short call if you have time.
-
-Thank you,
-[Your name]`,
-    },
-    curious: {
-      subject: `Question for you ${ctx.firstName}`,
-      body: `Hey ${ctx.firstName},
-
-I had a quick question. We help with ${b}.
-
-I noticed you${atCompany}${inPlace}. How are you handling that today?
-
-Happy to share what has worked for others if helpful.
-
-[Your name]`,
-    },
-    urgent: {
-      subject: `${ctx.firstName}, quick note`,
-      body: `Hey ${ctx.firstName},
-
-${b}
-
-I am reaching out to a few people${atCompany ? ` like ${ctx.company}` : ''}${inPlace}.
-
-Reply if you want to talk this week.
-
-[Your name]`,
-    },
-  }
-
-  return intros[agentId] ?? intros.warm
+  return writeColdOpeningEmail(agentId, input, ctx)
 }
 
 function writeFollowUp(

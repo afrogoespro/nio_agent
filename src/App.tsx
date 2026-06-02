@@ -38,7 +38,10 @@ export default function App() {
   useEffect(() => {
     const stored = loadPlanFromSession()
     if (stored?.input?.business && stored.plan.icpExample.source) {
-      if (stored.plan.icpExample.name === 'Jordan Lee' && stored.plan.icpExample.source === 'example') {
+      const isStaleExample =
+        stored.plan.icpExample.source === 'example' &&
+        (stored.plan.icpExample.name === 'Jordan Lee' || Boolean(stored.plan.apolloNote))
+      if (isStaleExample) {
         clearPlanSession()
         return
       }
