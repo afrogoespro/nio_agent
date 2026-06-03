@@ -17,6 +17,7 @@ export interface WizardDraft {
   business: string
   valueProp: string
   yourLocation: string
+  senderName: string
   idealCustomer: string
   whyTarget: string
   customerLocation: string
@@ -35,6 +36,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
   const [business, setBusiness] = useState(resume?.business ?? '')
   const [valueProp, setValueProp] = useState(resume?.valueProp ?? '')
   const [yourLocation, setYourLocation] = useState(resume?.yourLocation ?? '')
+  const [senderName, setSenderName] = useState(resume?.senderName ?? '')
   const [idealCustomer, setIdealCustomer] = useState(resume?.idealCustomer ?? '')
   const [whyTarget, setWhyTarget] = useState(resume?.whyTarget ?? '')
   const [customerLocation, setCustomerLocation] = useState(resume?.customerLocation ?? '')
@@ -46,7 +48,8 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
     (step === 1 &&
       business.trim().length > 2 &&
       valueProp.trim().length > 2 &&
-      yourLocation.trim().length > 1) ||
+      yourLocation.trim().length > 1 &&
+      senderName.trim().length > 1) ||
     (step === 2 &&
       idealCustomer.trim().length > 2 &&
       whyTarget.trim().length > 2 &&
@@ -64,6 +67,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
         business: business.trim(),
         valueProp: valueProp.trim(),
         yourLocation: normalizeYourLocation(yourLocation.trim()),
+        senderName: senderName.trim(),
         idealCustomer: idealCustomer.trim(),
         whyTarget: whyTarget.trim(),
         customerLocation: normalizeCustomerLocation(
@@ -80,6 +84,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
     business,
     valueProp,
     yourLocation,
+    senderName,
     idealCustomer,
     whyTarget,
     customerLocation,
@@ -127,6 +132,7 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
     setBusiness(example.business)
     setValueProp(example.valueProp)
     setYourLocation(example.yourLocation)
+    setSenderName(example.senderName)
     setIdealCustomer(example.idealCustomer)
     setWhyTarget(example.whyTarget)
     setCustomerLocation(example.customerLocation)
@@ -205,6 +211,18 @@ export function Wizard({ onComplete, onBack, resume, errorMessage }: WizardProps
               value={yourLocation}
               onChange={(e) => setYourLocation(e.target.value)}
               placeholder="Austin, Texas"
+            />
+            <label className="wizard__label" htmlFor="senderName">
+              Your name (signs the emails)
+            </label>
+            <input
+              id="senderName"
+              type="text"
+              className="wizard__input wizard__input--single"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              placeholder="Brandon"
+              autoComplete="name"
             />
           </div>
         )}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { OutreachPlan, WizardInput } from '../types/plan'
 import { getAgent } from '../lib/agents'
+import { emailContextFromLead, writeColdOpeningEmail } from '../lib/coldEmail'
 import {
   getExtraIcpTraitsFromStored,
   loadPlanFromSession,
@@ -92,6 +93,20 @@ export function Playbook({
     [plan, input.whyTarget, allTraits],
   )
 
+  const openingEmail = useMemo(() => {
+    const ctx = emailContextFromLead({
+      name: plan.icpExample.name,
+      firstName: plan.icpExample.firstName,
+      title: plan.icpExample.title,
+      companyName: plan.icpExample.companyName,
+      place:
+        plan.icpExample.whyFit
+          .find((w) => w.toLowerCase().startsWith('based in'))
+          ?.replace(/^based in /i, '') ?? input.customerLocation,
+    })
+    return writeColdOpeningEmail(input.agentId, input, ctx)
+  }, [plan.icpExample, input])
+
   const slides: PlanSlide[] = useMemo(() => {
     const list: PlanSlide[] = [
       {
@@ -146,7 +161,7 @@ export function Playbook({
             <p className="playbook-slide__lede">
               Written to feel personal, like a note on your own time, not a blast.
             </p>
-            <EmailBlock label="Opening email" email={plan.sampleEmail} />
+            <EmailBlock label="Opening email" email={openingEmail} />
           </div>
         ),
       },
@@ -180,7 +195,7 @@ export function Playbook({
     ]
 
     return list
-  }, [plan, input, extraTraits, agent, leadApproved, onFindMoreLikeLead])
+  }, [plan, input, extraTraits, agent, leadApproved, onFindMoreLikeLead, openingEmail])
 
   return (
     <div className="playbook">

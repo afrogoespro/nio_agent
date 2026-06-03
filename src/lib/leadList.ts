@@ -23,11 +23,16 @@ export function leadSearchKeywords(idealCustomer: string): string {
   return first.replace(/\s+(in|near|around|with)\s+[\w\s,'-]+$/i, '').trim() || trimmed
 }
 
-export function mapApolloPersonToQueueLead(person: ApolloPerson, index: number): QueueLead {
+export function mapApolloPersonToQueueLead(
+  person: ApolloPerson,
+  index: number,
+  fallbackArea = 'Your area',
+): QueueLead {
   const { fullName } = apolloDisplayName(person)
   const company = (person.organization?.name ?? '').trim() || 'Local business'
   const title = (person.title ?? '').trim() || 'Owner'
-  const place = [person.city, person.state].filter(Boolean).join(', ') || 'Your area'
+  const place =
+    [person.city, person.state].filter(Boolean).join(', ') || fallbackArea
   return {
     id: person.id ?? `apollo-${index}`,
     name: fullName,

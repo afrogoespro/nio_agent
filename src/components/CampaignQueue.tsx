@@ -9,7 +9,7 @@ import {
   type QueueLead,
 } from '../lib/leadList'
 import type { OutreachPlan, WizardInput } from '../types/plan'
-import { loadPlanFromSession } from '../lib/session'
+import { loadPlanFromSession, savePlanToSession } from '../lib/session'
 import { FlowProgress } from './FlowProgress'
 import './CampaignQueue.css'
 
@@ -48,10 +48,14 @@ export function CampaignQueue({
 
       if (cancelled) return
 
+      const fallbackArea =
+        input.customerLocation.trim() || input.yourLocation.trim() || 'Your area'
       let list: QueueLead[] = []
 
       if (result.ok && Array.isArray(result.people) && result.people.length > 0) {
-        list = (result.people as ApolloPerson[]).map(mapApolloPersonToQueueLead)
+        list = (result.people as ApolloPerson[]).map((p, i) =>
+          mapApolloPersonToQueueLead(p, i, fallbackArea),
+        )
         if (list.length < 10) {
           list = padLeadList(list, input, plan.icpExample, 10)
           setStatus(
@@ -69,6 +73,12 @@ export function CampaignQueue({
       }
 
       setLeads(list)
+      const snap = loadPlanFromSession()
+      savePlanToSession(plan, input, snap?.extraIcpTraits ?? [], {
+        leadApproved: snap?.leadApproved,
+        validationEnabled: snap?.validationEnabled,
+        queueLeads: list,
+      })
       setLoading(false)
     }
 

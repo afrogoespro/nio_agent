@@ -1,3 +1,4 @@
+import type { QueueLead } from './leadList'
 import type { OutreachPlan, WizardInput } from '../types/plan'
 
 const KEY = 'outreach-plan-v2'
@@ -8,13 +9,18 @@ interface Stored {
   extraIcpTraits?: string[]
   leadApproved?: boolean
   validationEnabled?: boolean
+  queueLeads?: QueueLead[]
 }
 
 export function savePlanToSession(
   plan: OutreachPlan,
   input: WizardInput,
   extraIcpTraits: string[] = [],
-  meta?: { leadApproved?: boolean; validationEnabled?: boolean },
+  meta?: {
+    leadApproved?: boolean
+    validationEnabled?: boolean
+    queueLeads?: QueueLead[]
+  },
 ): void {
   const prev = loadPlanFromSession()
   sessionStorage.setItem(
@@ -25,6 +31,7 @@ export function savePlanToSession(
       extraIcpTraits,
       leadApproved: meta?.leadApproved ?? prev?.leadApproved,
       validationEnabled: meta?.validationEnabled ?? prev?.validationEnabled,
+      queueLeads: meta?.queueLeads ?? prev?.queueLeads,
     }),
   )
   sessionStorage.removeItem('outreach-plan')

@@ -32,6 +32,7 @@ function toDraft(input: WizardInput): WizardDraft {
     business: input.business,
     valueProp: input.valueProp,
     yourLocation: input.yourLocation,
+    senderName: input.senderName,
     idealCustomer: input.idealCustomer,
     whyTarget: input.whyTarget,
     customerLocation: input.customerLocation,
@@ -60,6 +61,7 @@ export default function App() {
       setInput({
         ...stored.input,
         yourLocation: stored.input.yourLocation ?? '',
+        senderName: stored.input.senderName ?? '',
         customerLocation: stored.input.customerLocation ?? '',
       })
       setView('plan')

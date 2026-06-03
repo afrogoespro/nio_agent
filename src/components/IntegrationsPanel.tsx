@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { OutreachPlan } from '../types/plan'
+import type { EmailMessage, OutreachPlan } from '../types/plan'
 import type { IntegrationState } from '../types/integrations'
 import {
   getApolloApiKey,
@@ -18,12 +18,16 @@ interface IntegrationsPanelProps {
   plan: OutreachPlan
   customerLocation: string
   idealCustomer: string
+  previewEmail?: EmailMessage
+  defaultFromName?: string
 }
 
 export function IntegrationsPanel({
   plan,
   customerLocation,
   idealCustomer,
+  previewEmail,
+  defaultFromName = '',
 }: IntegrationsPanelProps) {
   const [state, setState] = useState<IntegrationState>(() => loadIntegrations())
   const [apolloKeyInput, setApolloKeyInput] = useState(() => getApolloApiKey())
@@ -53,7 +57,8 @@ export function IntegrationsPanel({
         ...state.email,
         connected: true,
         address,
-        fromName: state.email.fromName.trim() || 'My team',
+        fromName:
+          state.email.fromName.trim() || defaultFromName.trim() || 'My team',
       },
     })
     setStatus('Email connected. You can send a test below.')
@@ -79,11 +84,12 @@ export function IntegrationsPanel({
     }
     setBusy(true)
     setStatus(null)
+    const email = previewEmail ?? plan.sampleEmail
     const result = await sendTestEmail({
       to: state.email.address,
-      subject: plan.sampleEmail.subject,
-      body: plan.sampleEmail.body,
-      fromName: state.email.fromName,
+      subject: email.subject,
+      body: email.body,
+      fromName: state.email.fromName.trim() || defaultFromName.trim(),
     })
     setBusy(false)
     setStatus(result.message)

@@ -11,17 +11,15 @@ export interface EmailContext {
 
 const MAX_WORDS = 140
 
-/** User facing spec for future OpenAI wiring. */
 export const COLD_EMAIL_BRIEF = {
-  goal: 'Sound like a real person reaching out on their own time, not a campaign',
-  framework: 'Cold read their world, add value, soft ask',
+  goal: 'Simple cold read, then value, then soft ask',
+  framework: 'Hey name, saw you do Y, might need help with Z',
   maxWords: MAX_WORDS,
   readingLevel: '5th grade',
   rules: [
-    'Open with something specific you noticed about them (role, place, business).',
-    'Name a real pressure for their job or industry. Do not repeat the sender wizard text.',
-    'Offer value before a ask. Mention inbox noise if offering something free.',
-    'No sales jargon. No fake urgency. Short paragraphs.',
+    'Line 2 must be: Saw you [role/company] and might need help with [pain].',
+    'Do not repeat the sender wizard why-target text.',
+    'Sign with the sender name from the wizard.',
   ],
 } as const
 
@@ -39,135 +37,87 @@ function buildPersonalEmail(
   ctx: EmailContext,
 ): { subject: string; body: string } {
   const seed = `${ctx.firstName}${ctx.company}${ctx.title}`
-  const opener = coldReadOpener(ctx, seed)
-  const read = coldReadObservation(ctx, input, seed)
-  const pain = recipientPressureLine(ctx, input, seed)
-  const compliment = softCompliment(ctx, seed)
+  const coldRead = simpleColdRead(ctx, input, seed)
   const value = valueFirstBlock(agentId, input)
   const close = softClose(agentId)
 
   const body = [
     greetingFor(agentId, ctx.firstName),
     '',
-    opener,
-    '',
-    [read, pain, compliment].filter(Boolean).join(' '),
+    coldRead,
     '',
     value,
     '',
     close,
     '',
-    signOffFor(agentId),
+    signOffFor(agentId, input.senderName),
   ].join('\n')
 
   return { subject: subjectFor(agentId, ctx), body }
 }
 
-function coldReadOpener(ctx: EmailContext, seed: string): string {
-  const slot = seedChar(seed, 5)
+/** "Saw you're the manager at Office Depot and might need help with …" */
+function simpleColdRead(ctx: EmailContext, input: WizardInput, seed: string): string {
   const company = displayCompany(ctx)
-  const place = ctx.place.trim()
+  const title = ctx.title.trim()
+  const pain = shortPainClause(ctx, input, seed)
 
-  if (place && !isLargeBrand(ctx.company) && slot === 0) {
-    return `I was near ${place} recently and ${company} caught my eye.`
+  let y: string
+  if (title && title !== 'Owner') {
+    y = `you're the ${lowerFirst(title)} at ${company}`
+  } else if (isLargeBrand(ctx.company)) {
+    y = `you're on the team at ${company}`
+  } else {
+    y = `you're running things at ${company}`
   }
-  if (slot === 1 && ctx.title && ctx.title !== 'Owner') {
-    return `I saw you are the ${ctx.title} at ${company}.`
-  }
-  if (slot === 2) {
-    return `Hey, I was looking at ${company} online and had to reach out.`
-  }
-  if (slot === 3) {
-    return `Someone in your space mentioned ${company}, so I poked around.`
-  }
-  return `I came across ${company} and wanted to say hi on my own time, not as a blast.`
+
+  return `Saw ${y} and might need help with ${pain}.`
 }
 
-function coldReadObservation(
-  ctx: EmailContext,
-  input: WizardInput,
-  seed: string,
-): string {
-  const company = displayCompany(ctx)
-  const slot = seedChar(seed, 7)
-
-  if (isLargeBrand(ctx.company)) {
-    return `Teams like yours at ${company} usually juggle a lot of vendors and approvals.`
-  }
-
-  if (slot % 3 === 0 && ctx.place) {
-    return `${company} looks like a solid spot from the outside. I will have to stop in and say hi sometime.`
-  }
-
-  if (ctx.title && ctx.title !== 'Owner') {
-    return `From the outside it looks like you run a tight ship as ${ctx.title}.`
-  }
-
-  const label = inferLeadIndustryContext({
-    companyName: ctx.company,
-    title: ctx.title,
-    idealCustomer: input.idealCustomer,
-  }).label
-
-  return `You fit the kind of ${label} we have been helping lately.`
-}
-
-function recipientPressureLine(
-  ctx: EmailContext,
-  input: WizardInput,
-  seed: string,
-): string {
+function shortPainClause(ctx: EmailContext, input: WizardInput, seed: string): string {
   const industry = inferLeadIndustryContext({
     companyName: ctx.company,
     title: ctx.title,
     idealCustomer: input.idealCustomer,
   })
 
-  const pressures: Record<string, string[]> = {
+  const pains: Record<string, string[]> = {
     dental: [
-      'feels like new patient calls are harder to predict than they should be',
-      'is juggling front desk work and still trying to fill the schedule',
+      'keeping new patient calls steady',
+      'filling the schedule without more front desk chaos',
     ],
     restaurant: [
-      'might be losing covers when people cannot book or see the menu fast online',
-      'has slow nights that make staffing and food cost a guessing game',
+      'getting more reservations from people who find you online',
+      'smoothing out slow nights on payroll',
     ],
     property: [
-      'has vacancy or turnover eating into margin',
-      'needs faster answers on maintenance and leasing questions',
+      'filling vacancies faster',
+      'faster answers on maintenance and leasing',
     ],
     healthcare: [
-      'has schedule gaps when recall outreach is not consistent',
-      'is fielding intake questions with a lean front office team',
+      'fewer empty slots on the schedule',
+      'keeping recall visits from going cold',
     ],
     professional_services: [
-      'does good work but pipeline still depends on referrals and hustle',
-      'gets compared online before anyone takes a meeting',
+      'a steadier pipeline beyond referrals',
+      'more qualified conversations, not just busy work',
     ],
     retail: [
-      'is fighting traffic swings and margin pressure on core SKUs',
-      'only hears from repeat buyers during promos',
+      'steadier foot traffic without racing on price',
+      'repeat buyers who actually come back',
     ],
     corporate_ops: [
-      'is stuck coordinating too many vendors for the same floor',
-      'needs clear ROI before signing anything new',
+      'clear ROI before signing new vendor deals',
+      'too many vendors for the same floor',
     ],
     general: [
-      'is passionate but growth still feels choppy',
-      'is tired of marketing that does not turn into real replies',
+      'growth that does not depend on luck',
+      'marketing that actually gets replies',
     ],
   }
 
-  const list = pressures[industry.id] ?? pressures.general
-  const line = list[seedChar(seed, list.length)]
-  return `You ${line}.`
-}
-
-function softCompliment(ctx: EmailContext, seed: string): string {
-  if (seedChar(seed, 4) !== 0) return ''
-  const company = displayCompany(ctx)
-  if (isLargeBrand(ctx.company)) return 'Looks like a serious operation.'
-  return `Overall ${company} comes across well.`
+  const list = pains[industry.id] ?? pains.general
+  return list[seedChar(seed, list.length)]
 }
 
 function valueFirstBlock(agentId: AgentId, input: WizardInput): string {
@@ -175,31 +125,27 @@ function valueFirstBlock(agentId: AgentId, input: WizardInput): string {
   const proof = plainProof(input.valueProp)
   const free = freeLeadHook(input)
 
-  const pitchGuard =
-    'I am sure you get pitched all day, so I would rather add value first.'
-
   if (free) {
     const lines: Record<AgentId, string> = {
-      warm: `${pitchGuard} ${free} After that you can decide if you want to keep going.`,
-      relatable: `${pitchGuard} ${free} No pressure either way.`,
-      punchy: `${pitchGuard} ${free}`,
-      formal: `${pitchGuard} ${free} You may review and decide at your convenience.`,
-      curious: `${pitchGuard} ${free} Would that be useful?`,
-      urgent: `${pitchGuard} ${free} Reply if you want us to start.`,
+      warm: `I know your inbox is noisy. ${free} Then you decide if you want more.`,
+      relatable: `I know you get pitched a lot. ${free}`,
+      punchy: `Value first: ${free}`,
+      formal: `To respect your time: ${free}`,
+      curious: `Quick idea: ${free} Would that help?`,
+      urgent: `${free} Reply if you want us to start.`,
     }
     return lines[agentId]
   }
 
   const ask = softOfferAsk(input)
   const lines: Record<AgentId, string> = {
-    warm: `${pitchGuard} ${help}. ${proof} ${ask}`,
-    relatable: `${pitchGuard} We help with ${help}. ${proof} ${ask}`,
-    punchy: `${pitchGuard} ${help}. ${proof} ${ask}`,
-    formal: `${pitchGuard} We provide ${help}. ${proof} ${ask}`,
-    curious: `${pitchGuard} We built ${help}. ${proof} ${ask}`,
-    urgent: `${pitchGuard} ${help}. ${proof} ${ask}`,
+    warm: `We ${help}. ${proof} ${ask}`,
+    relatable: `We help with ${help}. ${proof} ${ask}`,
+    punchy: `${help}. ${proof} ${ask}`,
+    formal: `We ${help}. ${proof} ${ask}`,
+    curious: `We ${help}. ${proof} ${ask}`,
+    urgent: `${help}. ${proof} ${ask}`,
   }
-
   return lines[agentId]
 }
 
@@ -213,21 +159,20 @@ function freeLeadHook(input: WizardInput): string | null {
       ? 'booking leads'
       : 'leads'
 
-  return `Send your packages and we will get your first 5 ${noun} lined up on us. No call, no subscription.`
+  return `Send your packages and we will line up your first 5 ${noun} on us. No call, no subscription.`
 }
 
 function softOfferAsk(input: WizardInput): string {
-  const outcome = plainOutcome(input.business)
-  return `If we could help you ${outcome}, would that be worth a quick reply?`
+  return `If we could help you ${plainOutcome(input.business)}, worth a reply?`
 }
 
 function softClose(agentId: AgentId): string {
   const lines: Record<AgentId, string> = {
-    warm: 'No rush. Just reply if this is interesting.',
-    relatable: 'Either way, hope your week is going well.',
+    warm: 'No rush.',
+    relatable: 'No pressure either way.',
     punchy: 'Worth a reply?',
-    formal: 'Thank you for your time.',
-    curious: 'Curious if this is on your radar.',
+    formal: 'Thank you for reading.',
+    curious: 'On your radar?',
     urgent: 'Reply this week if you want in.',
   }
   return lines[agentId]
@@ -308,16 +253,10 @@ function greetingFor(agentId: AgentId, firstName: string): string {
   return greetings[agentId]
 }
 
-function signOffFor(agentId: AgentId): string {
-  const signOffs: Record<AgentId, string> = {
-    warm: '[Your name]',
-    relatable: '[Your name]',
-    punchy: '[Your name]',
-    formal: 'Thank you,\n[Your name]',
-    curious: '[Your name]',
-    urgent: '[Your name]',
-  }
-  return signOffs[agentId]
+function signOffFor(agentId: AgentId, senderName: string): string {
+  const name = senderName.trim() || 'Your name'
+  if (agentId === 'formal') return `Thank you,\n${name}`
+  return name
 }
 
 function shorten(text: string, max = 100): string {
@@ -339,5 +278,25 @@ function formatEmailDraft(email: { subject: string; body: string }): {
   return {
     subject: formatOutreachText(email.subject),
     body: formatOutreachText(trimToWordLimit(email.body, MAX_WORDS)),
+  }
+}
+
+export function emailContextFromLead(lead: {
+  firstName?: string
+  name: string
+  title: string
+  companyName?: string
+  company?: string
+  place?: string
+}): EmailContext {
+  const first =
+    lead.firstName?.trim() ||
+    lead.name.split(' ')[0]?.trim() ||
+    'there'
+  return {
+    firstName: first,
+    title: lead.title.trim() || 'Owner',
+    company: (lead.companyName ?? lead.company ?? '').trim() || 'a local business',
+    place: lead.place?.trim() ?? '',
   }
 }

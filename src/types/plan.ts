@@ -41,6 +41,8 @@ export interface WizardInput {
   /** What makes you different / why people buy from you */
   valueProp: string
   yourLocation: string
+  /** Who signs the emails */
+  senderName: string
   idealCustomer: string
   whyTarget: string
   customerLocation: string

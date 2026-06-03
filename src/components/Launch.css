@@ -95,6 +95,65 @@
   color: #fff;
 }
 
+.launch__preview-card {
+  margin-bottom: 1.75rem;
+  padding: 1.25rem 1.35rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+}
+
+.launch__preview-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c7d2fe;
+}
+
+.launch__preview-to {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: #e4e4e7;
+}
+
+.launch__sender {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.35rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+
+.launch__sender-title,
+.launch__connect-title {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.launch__sender-label {
+  display: block;
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #d4d4d8;
+}
+
+.launch__sender-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.65rem 0.85rem;
+  color: #1c1917;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 10px;
+}
+
 .launch__checklist {
   margin: 0 0 2rem;
   padding: 0;

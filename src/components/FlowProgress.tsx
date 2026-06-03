@@ -7,7 +7,7 @@ const STAGES = [
   'Your plan',
   'Warm up drip',
   'Your list',
-  'Launch',
+  'Preview',
 ] as const
 
 export type FlowStage = 1 | 2 | 3 | 4 | 5 | 6 | 7
