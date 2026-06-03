@@ -1,4 +1,5 @@
 import type { AgentId, IcpExample, OutreachPlan, WizardInput } from '../types/plan.js'
+import { APOLLO_PLAN_SAMPLE_SIZE } from './apolloConfig.js'
 import {
   apolloDisplayName,
   apolloSearchReason,
@@ -11,6 +12,7 @@ import {
   normalizeYourLocation,
   pickSearchLocations,
 } from './searchLocations.js'
+import { buildLeadWhyFit } from './industryPainPoints.js'
 import { formatEmail, formatOutreachText } from './outreachVoice.js'
 
 interface LeadContext {
@@ -174,7 +176,10 @@ async function apolloSearch(
   location: string,
   skipTitles: boolean,
 ): Promise<ApolloFetchResult> {
-  const result = await searchApolloPeople(apiKey, keywords, location, { skipTitles })
+  const result = await searchApolloPeople(apiKey, keywords, location, {
+    skipTitles,
+    perPage: APOLLO_PLAN_SAMPLE_SIZE,
+  })
   if (result.ok === false) {
     return { ok: false, reason: apolloSearchReason(result) }
   }
@@ -199,14 +204,19 @@ function mapApolloToLead(person: ApolloPerson, input: WizardInput): IcpExample {
     title,
     companyName: company,
     companyType: company,
-    foundVia: formatOutreachText(`Found on Apollo near ${area}`),
-    whyFit: [
-      formatOutreachText(`Works at ${company} as ${title}`),
-      place
-        ? formatOutreachText(`Based in ${place}`)
-        : formatOutreachText(`Matches your target area: ${area}`),
-      formatOutreachText(`Why they may care: ${truncate(input.whyTarget, 90)}`),
-    ],
+    foundVia: formatOutreachText(
+      place ? `Matched in ${place}` : `Matched near ${area}`,
+    ),
+    whyFit: buildLeadWhyFit({
+      idealCustomer: input.idealCustomer,
+      business: input.business,
+      whyTarget: input.whyTarget,
+      companyName: company,
+      title,
+      place,
+      area,
+      seed: fullName,
+    }).map((line) => formatOutreachText(line)),
   }
 }
 
@@ -218,12 +228,17 @@ function mapExampleLead(input: WizardInput): IcpExample {
     title: 'Owner',
     companyName: 'a sample business',
     companyType: formatOutreachText(companyHint(input.idealCustomer)),
-    foundVia: formatOutreachText('Example only. Not from Apollo.'),
-    whyFit: [
-      formatOutreachText(`Sounds like: ${truncate(input.idealCustomer, 80)}`),
-      formatOutreachText(`Your why: ${truncate(input.whyTarget, 80)}`),
-      formatOutreachText(`Your edge: ${truncate(input.valueProp, 80)}`),
-    ],
+    foundVia: formatOutreachText('Example profile for your target market'),
+    whyFit: buildLeadWhyFit({
+      idealCustomer: input.idealCustomer,
+      business: input.business,
+      whyTarget: input.whyTarget,
+      companyName: companyHint(input.idealCustomer),
+      title: 'Owner',
+      place: '',
+      area: input.customerLocation.trim() || input.yourLocation.trim() || 'your area',
+      seed: input.idealCustomer,
+    }).map((line) => formatOutreachText(line)),
   }
 }
 
@@ -250,30 +265,29 @@ function writeOpeningEmail(
 
 function writeFollowUp(
   _agentId: AgentId,
-  input: WizardInput,
+  _input: WizardInput,
   ctx: LeadContext,
   n: 2 | 3,
 ): { subject: string; body: string } {
   if (n === 2) {
     return {
-      subject: `Following up ${ctx.firstName}`,
+      subject: `Re: quick note`,
       body: `Hey ${ctx.firstName},
 
-Just bumping my last note about ${input.business.trim()}.
+Still on my mind. If you want those free leads lined up, just reply with your packages.
 
-Still open to a quick chat?
+No call needed.
 
 [Your name]`,
     }
   }
 
   return {
-    subject: `Last note ${ctx.firstName}`,
+    subject: `Closing the loop`,
     body: `Hey ${ctx.firstName},
 
-I will close the loop here. If you ever want to talk about ${input.business.trim()}, just reply.
+Last note from me. If a steady stream of leads ever matters, reply anytime.
 
-Thanks,
 [Your name]`,
   }
 }
@@ -290,7 +304,7 @@ function buildTraits(input: WizardInput): string[] {
 function buildFindTips(customerLocation: string, yourLocation: string): string[] {
   const area = customerLocation.trim() || yourLocation.trim() || 'your area'
   return [
-    formatOutreachText(`Search Apollo in ${area} for more people like this.`),
+    formatOutreachText(`Search LinkedIn or Google for similar titles in ${area}.`),
     formatOutreachText(`Google the job title and ${area}.`),
     formatOutreachText('Check the company website Contact page.'),
     formatOutreachText('Look at local business directories.'),

@@ -1,10 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { APOLLO_MAX_RESULTS } from '../src/lib/apolloConfig.js'
 import { apolloSearchReason, searchApolloPeople } from '../src/lib/apolloSearch.js'
 import { getServerApolloKey } from './lib/apolloEnv.js'
 
 interface Body {
   keywords?: string
   location?: string
+  limit?: number
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,12 +24,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
   }
 
-  const { keywords, location } = req.body as Body
+  const body = req.body as Body
+  const { keywords, location } = body
   if (!keywords?.trim()) {
     return res.status(400).json({ error: 'Missing keywords.' })
   }
 
-  const result = await searchApolloPeople(apiKey, keywords.trim(), location?.trim() ?? '')
+  const requested = Number(body.limit)
+  const limit = Number.isFinite(requested)
+    ? Math.min(APOLLO_MAX_RESULTS, Math.max(1, requested))
+    : APOLLO_MAX_RESULTS
+
+  const result = await searchApolloPeople(apiKey, keywords.trim(), location?.trim() ?? '', {
+    perPage: limit,
+  })
 
   if (result.ok === false) {
     return res.status(502).json({ error: apolloSearchReason(result) })

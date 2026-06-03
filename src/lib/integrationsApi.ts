@@ -1,4 +1,6 @@
+import { APOLLO_MAX_RESULTS } from './apolloConfig.js'
 import { getApolloApiKey } from './integrationStore'
+import { leadSearchKeywords } from './leadList.js'
 
 export async function fetchIntegrationStatus(): Promise<{
   apolloServer: boolean
@@ -37,11 +39,25 @@ export async function searchApolloLeads(payload: {
       'Content-Type': 'application/json',
       'x-apollo-key': getApolloApiKey(),
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      keywords: payload.keywords,
+      location: payload.location,
+      limit: APOLLO_MAX_RESULTS,
+    }),
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     return { ok: false, message: data.error ?? 'Apollo search failed.' }
   }
   return { ok: true, people: data.people, message: data.message }
+}
+
+export async function fetchLeadBatch(input: {
+  idealCustomer: string
+  customerLocation: string
+}): Promise<{ ok: boolean; people?: unknown[]; message?: string }> {
+  return searchApolloLeads({
+    keywords: leadSearchKeywords(input.idealCustomer),
+    location: input.customerLocation,
+  })
 }

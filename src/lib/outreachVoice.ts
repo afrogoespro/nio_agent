@@ -4,13 +4,13 @@
  */
 export const OUTREACH_VOICE = {
   readingLevel: '5th grade',
-  tone: 'Simple and helpful. Not pushy. No sales talk.',
+  tone: 'Personal, like a note on your own time. Cold read their business first.',
   rules: [
     'Use short sentences and common words.',
     'Do not use em dashes or hyphens anywhere in outreach text.',
     'Do not use words like leverage, synergy, optimize, or pipeline.',
-    'One clear ask per email. No fake urgency.',
-    'Write like you are talking to a friend at work.',
+    'Lead with what you noticed about them, not about your product.',
+    'Value before the ask. Acknowledge they get pitched a lot.',
   ],
 } as const
 
@@ -20,9 +20,8 @@ ${OUTREACH_VOICE.tone}
 Reading level: ${OUTREACH_VOICE.readingLevel}.
 Goal: Start a conversation or get a reply.
 Framework: PAS (Problem, Agitate, Solution) or AIDA (Attention, Interest, Desire, Action).
-The first line must mention something relevant about the recipient business or role. No generic compliments.
-Keep the full email under 140 words.
-CTA: "Would you be open to a quick chat this week?" or similar simple ask.
+Open like a human: something you saw, drove past, or read about their business. Name their pressure. Offer value (e.g. a few free leads) before asking for a reply.
+Keep the full email under 140 words. Soft CTA only.
 Output: subject line plus email body in plain text.
 ${OUTREACH_VOICE.rules.map((r) => `- ${r}`).join('\n')}
 Return valid JSON only. Every string in emails and subjects must follow these rules.`

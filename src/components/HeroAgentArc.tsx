@@ -1,15 +1,6 @@
 import { AGENTS } from '../lib/agents'
 import './HeroAgentArc.css'
 
-const SHORT_LABELS: Record<string, string> = {
-  warm: 'Warm',
-  relatable: 'Relatable',
-  punchy: 'Punchy',
-  formal: 'Formal',
-  curious: 'Curious',
-  urgent: 'Direct',
-}
-
 interface HeroAgentArcProps {
   showCaption?: boolean
   size?: 'default' | 'large'
@@ -41,7 +32,7 @@ export function HeroAgentArc({
                 decoding="async"
               />
             </div>
-            <span className="hero-arc__label">{SHORT_LABELS[agent.id]}</span>
+            <span className="hero-arc__label">{agent.displayName}</span>
           </div>
         ))}
       </div>

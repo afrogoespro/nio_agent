@@ -1,4 +1,5 @@
 import { BRAND } from '../lib/branding'
+import { NeoLogo } from './NeoLogo'
 import './BrandMark.css'
 
 interface BrandMarkProps {
@@ -6,10 +7,12 @@ interface BrandMarkProps {
 }
 
 export function BrandMark({ size = 'md' }: BrandMarkProps) {
+  const iconPx = size === 'sm' ? 30 : 38
+
   return (
     <div className={`brand-mark brand-mark--${size}`} aria-label={BRAND.name}>
       <span className="brand-mark__icon" aria-hidden="true">
-        N
+        <NeoLogo size={iconPx} className="brand-mark__logo" />
       </span>
       <div className="brand-mark__text">
         <span className="brand-mark__name">{BRAND.name}</span>

@@ -2,6 +2,8 @@ import type { AgentId } from '../types/plan'
 
 export interface Agent {
   id: AgentId
+  /** First name shown on hero circle */
+  displayName: string
   name: string
   tagline: string
   sampleSubject: string
@@ -11,6 +13,7 @@ export interface Agent {
 export const AGENTS: Agent[] = [
   {
     id: 'warm',
+    displayName: 'Sofia',
     name: 'Warm & helpful',
     tagline: 'Your rep sounds like a friend who wants to help',
     sampleSubject: 'Quick idea for your team',
@@ -18,6 +21,7 @@ export const AGENTS: Agent[] = [
   },
   {
     id: 'relatable',
+    displayName: 'Maya',
     name: 'Relatable & real',
     tagline: 'Your rep sounds natural, like a real person checking in',
     sampleSubject: 'Quick thought for you',
@@ -25,6 +29,7 @@ export const AGENTS: Agent[] = [
   },
   {
     id: 'punchy',
+    displayName: 'Marcus',
     name: 'Short & punchy',
     tagline: 'Your rep keeps it short and direct',
     sampleSubject: 'Worth 2 minutes?',
@@ -32,6 +37,7 @@ export const AGENTS: Agent[] = [
   },
   {
     id: 'formal',
+    displayName: 'David',
     name: 'Professional & formal',
     tagline: 'Your rep stays polished and businesslike',
     sampleSubject: 'Hello from my company',
@@ -39,6 +45,7 @@ export const AGENTS: Agent[] = [
   },
   {
     id: 'curious',
+    displayName: 'Alex',
     name: 'Curious question asker',
     tagline: 'Your rep leads with curiosity, not a pitch',
     sampleSubject: 'Quick question about your process',
@@ -46,6 +53,7 @@ export const AGENTS: Agent[] = [
   },
   {
     id: 'urgent',
+    displayName: 'Jordan',
     name: 'Urgent & direct',
     tagline: 'Your rep is clear about the next step',
     sampleSubject: 'Opening a few slots this week',

@@ -1,0 +1,42 @@
+.validate-info {
+  position: relative;
+  display: inline-block;
+}
+
+.validate-info__trigger {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+
+.validate-info__panel {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  width: min(18rem, 70vw);
+  padding: 0.85rem 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #1c1917;
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.18);
+}
+
+.validate-info__panel p {
+  margin: 0 0 0.5rem;
+}
+
+.validate-info__fine {
+  color: #57534e;
+  margin-bottom: 0 !important;
+}

@@ -8,10 +8,11 @@ import './Launch.css'
 interface LaunchProps {
   plan: OutreachPlan
   input: WizardInput
+  onBack: () => void
   onStartOver: () => void
 }
 
-export function Launch({ plan, input, onStartOver }: LaunchProps) {
+export function Launch({ plan, input, onBack, onStartOver }: LaunchProps) {
   const agent = getAgent(input.agentId)
 
   const copyAll = [
@@ -26,8 +27,11 @@ export function Launch({ plan, input, onStartOver }: LaunchProps) {
   return (
     <div className="launch">
       <div className="launch__inner">
+        <button type="button" className="launch__back" onClick={onBack}>
+          ← Back
+        </button>
         <div className="launch__flow">
-          <FlowProgress current={5} />
+          <FlowProgress current={7} />
         </div>
         {agent && (
           <img

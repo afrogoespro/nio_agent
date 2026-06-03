@@ -1,22 +1,64 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { OutreachPlan, WizardInput } from '../types/plan'
 import { getAgent } from '../lib/agents'
+import {
+  getExtraIcpTraitsFromStored,
+  loadPlanFromSession,
+  savePlanToSession,
+} from '../lib/session'
 import { FlowProgress } from './FlowProgress'
 import { PlanCarousel, type PlanSlide } from './PlanCarousel'
 import { IcpCard } from './IcpCard'
 import { EmailBlock } from './EmailBlock'
 import { CopyButton } from './CopyButton'
+import { PlaybookTraitsSlide } from './PlaybookTraitsSlide'
+import { LeadMatchActions } from './LeadMatchActions'
 import './Playbook.css'
 
 interface PlaybookProps {
   plan: OutreachPlan
   input: WizardInput
-  onLaunch: () => void
+  onContinueToDrip: () => void
+  onFindMoreLikeLead: () => void
+  onBack: () => void
   onStartOver: () => void
 }
 
-export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) {
+export function Playbook({
+  plan,
+  input,
+  onContinueToDrip,
+  onFindMoreLikeLead,
+  onBack,
+  onStartOver,
+}: PlaybookProps) {
   const agent = getAgent(input.agentId)
+  const [extraTraits, setExtraTraits] = useState<string[]>(() =>
+    getExtraIcpTraitsFromStored(loadPlanFromSession()),
+  )
+  const [leadApproved, setLeadApproved] = useState(
+    () => loadPlanFromSession()?.leadApproved ?? false,
+  )
+
+  useEffect(() => {
+    savePlanToSession(plan, input, extraTraits, {
+      leadApproved,
+      validationEnabled: loadPlanFromSession()?.validationEnabled,
+    })
+  }, [plan, input, extraTraits, leadApproved])
+
+  function approveLead(validation: boolean) {
+    setLeadApproved(true)
+    savePlanToSession(plan, input, extraTraits, {
+      leadApproved: true,
+      validationEnabled: validation,
+    })
+  }
+
+  const allTraits = useMemo(
+    () => [...plan.icpTraits, ...extraTraits],
+    [plan.icpTraits, extraTraits],
+  )
 
   const copyAll = useMemo(
     () =>
@@ -34,11 +76,12 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
         plan.sampleEmail.body,
         ``,
         `=== WHO TO LOOK FOR ===`,
-        ...plan.icpTraits.map((t) => `• ${t}`),
+        ...allTraits.map((t) => `• ${t}`),
         ``,
         `=== WHERE TO FIND EMAILS ===`,
         ...plan.findLeadsTips.map((t) => `• ${t}`),
         ``,
+        `=== WARM UP DRIP ===`,
         ...plan.drip.flatMap((d) => [
           `=== ${d.dayLabel.toUpperCase()} ===`,
           `Subject: ${d.subject}`,
@@ -46,7 +89,7 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
           ``,
         ]),
       ].join('\n'),
-    [plan, input.whyTarget],
+    [plan, input.whyTarget, allTraits],
   )
 
   const slides: PlanSlide[] = useMemo(() => {
@@ -78,10 +121,20 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
           <div className="playbook-slide">
             <p className="playbook-slide__lede">
               {plan.icpExample.source === 'apollo'
-                ? 'A real person from Apollo. Your email uses their name and company.'
-                : 'Example only. Apollo did not return a match this time.'}
+                ? `Look what ${agent?.displayName ?? 'your rep'} found — here is someone who looks like a strong fit.`
+                : `${agent?.displayName ?? 'Your rep'} is showing a sample profile — the same kind of person Neo will hunt for on your list.`}
             </p>
             <IcpCard icp={plan.icpExample} />
+            <LeadMatchActions
+              leadName={plan.icpExample.name}
+              approved={leadApproved}
+              onPerfect={() => approveLead(false)}
+              onValidate={() => approveLead(true)}
+              onFindMore={() => {
+                approveLead(true)
+                onFindMoreLikeLead()
+              }}
+            />
           </div>
         ),
       },
@@ -90,7 +143,9 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
         title: 'Your opening email',
         content: (
           <div className="playbook-slide">
-            <p className="playbook-slide__lede">Copy this and send when you are ready.</p>
+            <p className="playbook-slide__lede">
+              Written to feel personal, like a note on your own time, not a blast.
+            </p>
             <EmailBlock label="Opening email" email={plan.sampleEmail} />
           </div>
         ),
@@ -99,14 +154,11 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
         id: 'traits',
         title: 'Who else to look for',
         content: (
-          <div className="playbook-slide">
-            <p className="playbook-slide__lede">Look for people who match these traits.</p>
-            <ul className="playbook__list">
-              {plan.icpTraits.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-          </div>
+          <PlaybookTraitsSlide
+            baseTraits={plan.icpTraits}
+            extraTraits={extraTraits}
+            onExtraTraitsChange={setExtraTraits}
+          />
         ),
       },
       {
@@ -127,29 +179,20 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
       },
     ]
 
-    plan.drip.forEach((email) => {
-      if (email.dayLabel === 'Day 1') return
-      list.push({
-        id: email.dayLabel,
-        title: `${email.dayLabel} follow up`,
-        content: (
-          <div className="playbook-slide">
-            <p className="playbook-slide__lede">Send this on {email.dayLabel}.</p>
-            <EmailBlock label={email.dayLabel} email={email} />
-          </div>
-        ),
-      })
-    })
-
     return list
-  }, [plan, input])
+  }, [plan, input, extraTraits, agent, leadApproved, onFindMoreLikeLead])
 
   return (
     <div className="playbook">
       <header className="playbook__header">
-        <button type="button" className="playbook__back" onClick={onStartOver}>
-          ← Start over
-        </button>
+        <div className="playbook__nav-row">
+          <button type="button" className="playbook__back" onClick={onBack}>
+            ← Back
+          </button>
+          <button type="button" className="playbook__start-over" onClick={onStartOver}>
+            Start over
+          </button>
+        </div>
         <div className="playbook__flow">
           <FlowProgress current={4} />
         </div>
@@ -171,7 +214,7 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
             />
           )}
           <div>
-            <p className="playbook__step-label">Step 4 of 5 · Your plan</p>
+            <p className="playbook__step-label">Step 4 of 7 · Your plan</p>
             <h1>Your rep&apos;s playbook</h1>
           </div>
           <CopyButton text={copyAll} label="Copy all" className="playbook__copy-all" />
@@ -179,7 +222,12 @@ export function Playbook({ plan, input, onLaunch, onStartOver }: PlaybookProps) 
       </header>
 
       <main className="playbook__main playbook__main--carousel">
-        <PlanCarousel slides={slides} onLaunch={onLaunch} />
+        <PlanCarousel
+          slides={slides}
+          onFinish={onContinueToDrip}
+          gateSlideId="lead"
+          canAdvance={leadApproved}
+        />
       </main>
     </div>
   )

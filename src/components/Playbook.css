@@ -49,15 +49,31 @@
   color: #78350f;
 }
 
-.playbook__back {
+.playbook__nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.playbook__back,
+.playbook__start-over {
   font-family: inherit;
   font-size: 0.9375rem;
-  color: #4f46e5;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.25rem 0 1rem;
+  padding: 0.25rem 0;
   min-height: 44px;
+}
+
+.playbook__back {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.playbook__start-over {
+  color: #78716c;
 }
 
 .playbook__title-block {

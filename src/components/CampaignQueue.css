@@ -1,0 +1,217 @@
+.campaign-queue {
+  min-height: 100vh;
+  background: #fafaf9;
+  color: #1c1917;
+}
+
+.campaign-queue__header {
+  padding: 1rem clamp(1.25rem, 4vw, 3rem) 0;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.campaign-queue__nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.campaign-queue__back,
+.campaign-queue__start-over {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.campaign-queue__back {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.campaign-queue__start-over {
+  color: #78716c;
+}
+
+.campaign-queue__title-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.campaign-queue__avatar {
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.2);
+}
+
+.campaign-queue__step-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6366f1;
+}
+
+.campaign-queue__title-block h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.campaign-queue__main {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1.25rem, 4vw, 3rem) 3rem;
+}
+
+.campaign-queue__loading {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 16px;
+}
+
+.campaign-queue__loading-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.campaign-queue__loading-sub {
+  margin: 0;
+  color: #57534e;
+  line-height: 1.5;
+}
+
+.campaign-queue__status {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  background: #fef9c3;
+  border: 1px solid #fde047;
+  border-radius: 10px;
+  color: #713f12;
+}
+
+.campaign-queue__list {
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.campaign-queue__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+}
+
+.campaign-queue__num {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #4f46e5;
+  background: #eef2ff;
+  border-radius: 8px;
+}
+
+.campaign-queue__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.9375rem;
+}
+
+.campaign-queue__meta strong {
+  font-size: 1rem;
+}
+
+.campaign-queue__meta span {
+  color: #57534e;
+}
+
+.campaign-queue__place {
+  font-size: 0.8125rem !important;
+}
+
+.campaign-queue__badge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #166534;
+  background: #dcfce7;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+}
+
+.campaign-queue__promise {
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: 14px;
+}
+
+.campaign-queue__promise-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #312e81;
+}
+
+.campaign-queue__promise p:last-child {
+  margin: 0;
+  line-height: 1.55;
+  color: #44403c;
+}
+
+.campaign-queue__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.campaign-queue__cta {
+  font-family: inherit;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  padding: 0.9rem 1.5rem;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+}
+
+.campaign-queue__secondary {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #57534e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}

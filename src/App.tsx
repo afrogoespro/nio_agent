@@ -3,6 +3,8 @@ import { Landing } from './components/Landing'
 import { Wizard, type WizardDraft } from './components/Wizard'
 import { LoadingState } from './components/LoadingState'
 import { Playbook } from './components/Playbook'
+import { WarmUpDrip } from './components/WarmUpDrip'
+import { CampaignQueue } from './components/CampaignQueue'
 import { Launch } from './components/Launch'
 import { PrivacyPolicy } from './components/PrivacyPolicy'
 import { generatePlan } from './lib/generatePlan'
@@ -14,7 +16,15 @@ import {
 import type { OutreachPlan, WizardInput } from './types/plan'
 import './App.css'
 
-type View = 'landing' | 'wizard' | 'loading' | 'plan' | 'launch' | 'privacy'
+type View =
+  | 'landing'
+  | 'wizard'
+  | 'loading'
+  | 'plan'
+  | 'drip'
+  | 'queue'
+  | 'launch'
+  | 'privacy'
 
 function toDraft(input: WizardInput): WizardDraft {
   return {
@@ -75,8 +85,13 @@ export default function App() {
     setError(null)
     setView('loading')
 
+    const minLoadingMs = 6500
+
     try {
-      const result = await generatePlan(wizardInput)
+      const [result] = await Promise.all([
+        generatePlan(wizardInput),
+        new Promise<void>((resolve) => setTimeout(resolve, minLoadingMs)),
+      ])
       if (!result?.icpExample?.name || !result?.sampleEmail?.body) {
         throw new Error('Plan came back incomplete. Please try again.')
       }
@@ -104,11 +119,42 @@ export default function App() {
   }
 
   if (view === 'loading') {
-    return <LoadingState />
+    return <LoadingState agentId={input?.agentId} />
   }
 
   if (view === 'launch' && plan && input) {
-    return <Launch plan={plan} input={input} onStartOver={handleStartOver} />
+    return (
+      <Launch
+        plan={plan}
+        input={input}
+        onBack={() => setView('queue')}
+        onStartOver={handleStartOver}
+      />
+    )
+  }
+
+  if (view === 'queue' && plan && input) {
+    return (
+      <CampaignQueue
+        plan={plan}
+        input={input}
+        onContinue={() => setView('launch')}
+        onBack={() => setView('drip')}
+        onStartOver={handleStartOver}
+      />
+    )
+  }
+
+  if (view === 'drip' && plan && input) {
+    return (
+      <WarmUpDrip
+        plan={plan}
+        input={input}
+        onContinue={() => setView('queue')}
+        onBack={() => setView('plan')}
+        onStartOver={handleStartOver}
+      />
+    )
   }
 
   if (view === 'plan' && plan && input) {
@@ -116,7 +162,12 @@ export default function App() {
       <Playbook
         plan={plan}
         input={input}
-        onLaunch={() => setView('launch')}
+        onContinueToDrip={() => setView('drip')}
+        onFindMoreLikeLead={() => setView('queue')}
+        onBack={() => {
+          setWizardResume(input ? toDraft(input) : null)
+          setView('wizard')
+        }}
         onStartOver={handleStartOver}
       />
     )

@@ -10,7 +10,7 @@ export function IcpCard({ icp }: IcpCardProps) {
   return (
     <article className={`icp-card ${isReal ? 'icp-card--real' : ''}`}>
       <p className="icp-card__badge">
-        {isReal ? 'Lead we found for you' : 'Example lead (no Apollo match)'}
+        {isReal ? 'Lead we found for you' : 'Example lead'}
       </p>
       <h3 className="icp-card__name">{icp.name}</h3>
       <p className="icp-card__meta">
@@ -20,7 +20,7 @@ export function IcpCard({ icp }: IcpCardProps) {
       {!isReal && (
         <p className="icp-card__disclaimer">
           We could not pull a live contact this time. This shows the kind of person
-          to look for. Try again from Launch with Apollo connected.
+          your rep will keep searching for on your list.
         </p>
       )}
       <ul className="icp-card__why">

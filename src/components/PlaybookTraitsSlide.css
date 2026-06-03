@@ -1,0 +1,84 @@
+.playbook-traits__extra-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.playbook-traits__remove {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.playbook-traits__remove:hover {
+  color: #4f46e5;
+}
+
+.playbook-traits__add {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e7e5e4;
+}
+
+.playbook-traits__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.playbook-traits__row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.playbook-traits__input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.playbook-traits__input:focus {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 1px;
+  border-color: #818cf8;
+}
+
+.playbook-traits__add-btn {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.65rem 1.1rem;
+  color: #fff;
+  background: #4f46e5;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.playbook-traits__add-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.playbook-traits__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: #78716c;
+}

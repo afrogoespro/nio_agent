@@ -1,4 +1,5 @@
 import type { AgentId, WizardInput } from '../types/plan.js'
+import { inferLeadIndustryContext } from './industryPainPoints.js'
 import { formatOutreachText } from './outreachVoice.js'
 
 export interface EmailContext {
@@ -8,20 +9,19 @@ export interface EmailContext {
   place: string
 }
 
-const CTA = 'Open to a quick chat this week?'
-const MAX_WORDS = 75
+const MAX_WORDS = 140
 
 /** User facing spec for future OpenAI wiring. */
 export const COLD_EMAIL_BRIEF = {
-  goal: 'Start a conversation or get a reply',
-  framework: 'Short PAS style',
+  goal: 'Sound like a real person reaching out on their own time, not a campaign',
+  framework: 'Cold read their world, add value, soft ask',
   maxWords: MAX_WORDS,
-  cta: CTA,
   readingLevel: '5th grade',
   rules: [
-    'Keep the first outreach email very short (about 4 sentences).',
-    'Plain talk. No sales fluff.',
-    'Mention their world in line one. Offer + CTA in the last lines.',
+    'Open with something specific you noticed about them (role, place, business).',
+    'Name a real pressure for their job or industry. Do not repeat the sender wizard text.',
+    'Offer value before a ask. Mention inbox noise if offering something free.',
+    'No sales jargon. No fake urgency. Short paragraphs.',
   ],
 } as const
 
@@ -30,87 +30,213 @@ export function writeColdOpeningEmail(
   input: WizardInput,
   ctx: EmailContext,
 ): { subject: string; body: string } {
-  return formatEmailDraft(buildShortEmail(agentId, input, ctx))
+  return formatEmailDraft(buildPersonalEmail(agentId, input, ctx))
 }
 
-function buildShortEmail(
+function buildPersonalEmail(
   agentId: AgentId,
   input: WizardInput,
   ctx: EmailContext,
 ): { subject: string; body: string } {
-  const industry = guessIndustry(input)
-  const pain = plainPain(input.whyTarget)
-  const offer = plainOffer(input.valueProp)
-  const peers = peersLikeYou(industry)
+  const seed = `${ctx.firstName}${ctx.company}${ctx.title}`
+  const opener = coldReadOpener(ctx, seed)
+  const read = coldReadObservation(ctx, input, seed)
+  const pain = recipientPressureLine(ctx, input, seed)
+  const compliment = softCompliment(ctx, seed)
+  const value = valueFirstBlock(agentId, input)
+  const close = softClose(agentId)
 
-  const core = [
+  const body = [
     greetingFor(agentId, ctx.firstName),
     '',
-    hookLine(agentId, ctx, industry, pain, peers),
+    opener,
     '',
-    offerLine(agentId, input, offer),
+    [read, pain, compliment].filter(Boolean).join(' '),
     '',
-    ctaLine(agentId),
+    value,
+    '',
+    close,
     '',
     signOffFor(agentId),
   ].join('\n')
 
-  return { subject: subjectFor(agentId, ctx, input), body: core }
+  return { subject: subjectFor(agentId, ctx), body }
 }
 
-function hookLine(
-  agentId: AgentId,
+function coldReadOpener(ctx: EmailContext, seed: string): string {
+  const slot = seedChar(seed, 5)
+  const company = displayCompany(ctx)
+  const place = ctx.place.trim()
+
+  if (place && !isLargeBrand(ctx.company) && slot === 0) {
+    return `I was near ${place} recently and ${company} caught my eye.`
+  }
+  if (slot === 1 && ctx.title && ctx.title !== 'Owner') {
+    return `I saw you are the ${ctx.title} at ${company}.`
+  }
+  if (slot === 2) {
+    return `Hey, I was looking at ${company} online and had to reach out.`
+  }
+  if (slot === 3) {
+    return `Someone in your space mentioned ${company}, so I poked around.`
+  }
+  return `I came across ${company} and wanted to say hi on my own time, not as a blast.`
+}
+
+function coldReadObservation(
   ctx: EmailContext,
-  _industry: string,
-  pain: string,
-  peers: string,
+  input: WizardInput,
+  seed: string,
 ): string {
   const company = displayCompany(ctx)
+  const slot = seedChar(seed, 7)
 
-  if (agentId === 'curious') {
-    return `Quick question about ${company} — I keep seeing ${peers} struggle with ${pain}. How are you handling that?`
+  if (isLargeBrand(ctx.company)) {
+    return `Teams like yours at ${company} usually juggle a lot of vendors and approvals.`
   }
-  if (agentId === 'punchy') {
-    return `I notice ${peers} often lose out when ${pain}.`
+
+  if (slot % 3 === 0 && ctx.place) {
+    return `${company} looks like a solid spot from the outside. I will have to stop in and say hi sometime.`
   }
-  if (agentId === 'urgent') {
-    return `I am reaching out to a few ${peers} near you. Many are dealing with ${pain}.`
+
+  if (ctx.title && ctx.title !== 'Owner') {
+    return `From the outside it looks like you run a tight ship as ${ctx.title}.`
   }
-  if (agentId === 'formal') {
-    return `I work with ${peers}. A common issue is ${pain}.`
-  }
-  if (agentId === 'relatable') {
-    return `I have been talking with a few ${peers}. A lot of them mention ${pain}.`
-  }
-  return `I notice a lot of ${peers} like ${company} are dealing with ${pain}.`
+
+  const label = inferLeadIndustryContext({
+    companyName: ctx.company,
+    title: ctx.title,
+    idealCustomer: input.idealCustomer,
+  }).label
+
+  return `You fit the kind of ${label} we have been helping lately.`
 }
 
-function offerLine(agentId: AgentId, input: WizardInput, offer: string): string {
-  const whatWeDo = plainWhatWeDo(input.business)
+function recipientPressureLine(
+  ctx: EmailContext,
+  input: WizardInput,
+  seed: string,
+): string {
+  const industry = inferLeadIndustryContext({
+    companyName: ctx.company,
+    title: ctx.title,
+    idealCustomer: input.idealCustomer,
+  })
 
+  const pressures: Record<string, string[]> = {
+    dental: [
+      'feels like new patient calls are harder to predict than they should be',
+      'is juggling front desk work and still trying to fill the schedule',
+    ],
+    restaurant: [
+      'might be losing covers when people cannot book or see the menu fast online',
+      'has slow nights that make staffing and food cost a guessing game',
+    ],
+    property: [
+      'has vacancy or turnover eating into margin',
+      'needs faster answers on maintenance and leasing questions',
+    ],
+    healthcare: [
+      'has schedule gaps when recall outreach is not consistent',
+      'is fielding intake questions with a lean front office team',
+    ],
+    professional_services: [
+      'does good work but pipeline still depends on referrals and hustle',
+      'gets compared online before anyone takes a meeting',
+    ],
+    retail: [
+      'is fighting traffic swings and margin pressure on core SKUs',
+      'only hears from repeat buyers during promos',
+    ],
+    corporate_ops: [
+      'is stuck coordinating too many vendors for the same floor',
+      'needs clear ROI before signing anything new',
+    ],
+    general: [
+      'is passionate but growth still feels choppy',
+      'is tired of marketing that does not turn into real replies',
+    ],
+  }
+
+  const list = pressures[industry.id] ?? pressures.general
+  const line = list[seedChar(seed, list.length)]
+  return `You ${line}.`
+}
+
+function softCompliment(ctx: EmailContext, seed: string): string {
+  if (seedChar(seed, 4) !== 0) return ''
+  const company = displayCompany(ctx)
+  if (isLargeBrand(ctx.company)) return 'Looks like a serious operation.'
+  return `Overall ${company} comes across well.`
+}
+
+function valueFirstBlock(agentId: AgentId, input: WizardInput): string {
+  const help = plainWhatWeDo(input.business)
+  const proof = plainProof(input.valueProp)
+  const free = freeLeadHook(input)
+
+  const pitchGuard =
+    'I am sure you get pitched all day, so I would rather add value first.'
+
+  if (free) {
+    const lines: Record<AgentId, string> = {
+      warm: `${pitchGuard} ${free} After that you can decide if you want to keep going.`,
+      relatable: `${pitchGuard} ${free} No pressure either way.`,
+      punchy: `${pitchGuard} ${free}`,
+      formal: `${pitchGuard} ${free} You may review and decide at your convenience.`,
+      curious: `${pitchGuard} ${free} Would that be useful?`,
+      urgent: `${pitchGuard} ${free} Reply if you want us to start.`,
+    }
+    return lines[agentId]
+  }
+
+  const ask = softOfferAsk(input)
   const lines: Record<AgentId, string> = {
-    warm: `We built something to help: ${whatWeDo}. ${offer}.`,
-    relatable: `We help with ${whatWeDo} — ${offer}.`,
-    punchy: `We built ${whatWeDo} — ${offer}.`,
-    formal: `We offer ${whatWeDo}. ${offer}.`,
-    curious: `We built something to help: ${whatWeDo}. ${offer}.`,
-    urgent: `We built something to help: ${whatWeDo}. ${offer}.`,
+    warm: `${pitchGuard} ${help}. ${proof} ${ask}`,
+    relatable: `${pitchGuard} We help with ${help}. ${proof} ${ask}`,
+    punchy: `${pitchGuard} ${help}. ${proof} ${ask}`,
+    formal: `${pitchGuard} We provide ${help}. ${proof} ${ask}`,
+    curious: `${pitchGuard} We built ${help}. ${proof} ${ask}`,
+    urgent: `${pitchGuard} ${help}. ${proof} ${ask}`,
   }
 
   return lines[agentId]
 }
 
-function ctaLine(agentId: AgentId): string {
-  const lines: Record<AgentId, string> = {
-    warm: CTA,
-    relatable: 'Would a quick chat this week work?',
-    punchy: 'Worth a quick chat?',
-    formal: CTA,
-    curious: CTA,
-    urgent: 'Reply if you want to talk this week.',
-  }
+function freeLeadHook(input: WizardInput): string | null {
+  const blob = `${input.business} ${input.valueProp}`.toLowerCase()
+  if (!/lead|patient|client|booking|customer|account/.test(blob)) return null
 
+  const noun = blob.includes('patient')
+    ? 'patient leads'
+    : blob.includes('restaurant') || blob.includes('reservation')
+      ? 'booking leads'
+      : 'leads'
+
+  return `Send your packages and we will get your first 5 ${noun} lined up on us. No call, no subscription.`
+}
+
+function softOfferAsk(input: WizardInput): string {
+  const outcome = plainOutcome(input.business)
+  return `If we could help you ${outcome}, would that be worth a quick reply?`
+}
+
+function softClose(agentId: AgentId): string {
+  const lines: Record<AgentId, string> = {
+    warm: 'No rush. Just reply if this is interesting.',
+    relatable: 'Either way, hope your week is going well.',
+    punchy: 'Worth a reply?',
+    formal: 'Thank you for your time.',
+    curious: 'Curious if this is on your radar.',
+    urgent: 'Reply this week if you want in.',
+  }
   return lines[agentId]
+}
+
+function isLargeBrand(company: string): boolean {
+  return /office depot|staples|walmart|target|amazon|homedepot|costco|fedex|ups store/i.test(
+    company,
+  )
 }
 
 function displayCompany(ctx: EmailContext): string {
@@ -118,7 +244,6 @@ function displayCompany(ctx: EmailContext): string {
     ctx.company &&
     ctx.company !== 'a local business' &&
     ctx.company !== 'a sample business' &&
-    !ctx.company.toLowerCase().includes('restaurant') &&
     ctx.company.length > 3
   ) {
     return ctx.company
@@ -126,20 +251,10 @@ function displayCompany(ctx: EmailContext): string {
   return 'your place'
 }
 
-function peersLikeYou(industry: string): string {
-  if (industry === 'restaurants') return 'restaurants like yours'
-  if (industry === 'dental') return 'dental offices like yours'
-  if (industry === 'pet care') return 'teams like yours'
-  return 'businesses like yours'
-}
-
-function plainPain(whyTarget: string): string {
-  const t = whyTarget.trim().replace(/^(because|since)\s+/i, '')
-  return shorten(lowerFirst(t), 90)
-}
-
-function plainOffer(valueProp: string): string {
-  return shorten(lowerFirst(valueProp.trim()), 70)
+function seedChar(seed: string, mod: number): number {
+  let n = 0
+  for (let i = 0; i < seed.length; i++) n = (n + seed.charCodeAt(i)) % mod
+  return n
 }
 
 function plainWhatWeDo(business: string): string {
@@ -147,7 +262,19 @@ function plainWhatWeDo(business: string): string {
   t = t.replace(/^(i|we)\s+(help|build|run|make|do)\s+/i, '')
   t = t.replace(/^(i|we)\s+/i, '')
   t = t.replace(/\.$/, '')
-  return shorten(lowerFirst(t), 60)
+  return shorten(lowerFirst(t), 72)
+}
+
+function plainProof(valueProp: string): string {
+  return shorten(lowerFirst(valueProp.trim()), 65)
+}
+
+function plainOutcome(business: string): string {
+  const t = business.toLowerCase()
+  if (t.includes('lead')) return 'get a steadier stream of reliable leads'
+  if (t.includes('patient')) return 'fill more new patient slots'
+  if (t.includes('website') || t.includes('web')) return 'get more bookings from your site'
+  return 'grow without living on marketplaces'
 }
 
 function lowerFirst(text: string): string {
@@ -155,30 +282,18 @@ function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1)
 }
 
-function subjectFor(agentId: AgentId, ctx: EmailContext, input: WizardInput): string {
-  const company =
-    ctx.company && !ctx.company.startsWith('a ')
-      ? ctx.company.split(' ').slice(0, 3).join(' ')
-      : guessIndustryLabel(input)
-
-  const subjects: Record<AgentId, string> = {
-    warm: `Quick note for ${ctx.firstName}`,
-    relatable: `Quick thought, ${ctx.firstName}`,
-    punchy: `${ctx.firstName}, quick idea`,
-    formal: `Hello ${ctx.firstName}`,
-    curious: `Question for ${ctx.firstName}`,
-    urgent: `${ctx.firstName}, quick note`,
+function subjectFor(agentId: AgentId, ctx: EmailContext): string {
+  const company = displayCompany(ctx)
+  const subjects: Record<AgentId, string[]> = {
+    warm: [`Quick note, ${ctx.firstName}`, `Saw ${company}`, `${ctx.firstName}, quick hello`],
+    relatable: [`${ctx.firstName}, quick thought`, `Saw your spot`, `Hey ${ctx.firstName}`],
+    punchy: [`${ctx.firstName}, quick idea`, `For ${company}`, `Quick note`],
+    formal: [`Note for ${ctx.firstName}`, `Hello ${ctx.firstName}`],
+    curious: [`Question for ${ctx.firstName}`, `About ${company}`],
+    urgent: [`${ctx.firstName}, quick note`, `For ${company}`],
   }
-
-  void company
-  return subjects[agentId]
-}
-
-function guessIndustryLabel(input: WizardInput): string {
-  const industry = guessIndustry(input)
-  if (industry === 'restaurants') return 'your restaurant'
-  if (industry === 'dental') return 'your office'
-  return 'your business'
+  const list = subjects[agentId]
+  return list[seedChar(ctx.firstName + company, list.length)]
 }
 
 function greetingFor(agentId: AgentId, firstName: string): string {
@@ -190,7 +305,6 @@ function greetingFor(agentId: AgentId, firstName: string): string {
     curious: `Hey ${firstName},`,
     urgent: `Hey ${firstName},`,
   }
-
   return greetings[agentId]
 }
 
@@ -203,18 +317,7 @@ function signOffFor(agentId: AgentId): string {
     curious: '[Your name]',
     urgent: '[Your name]',
   }
-
   return signOffs[agentId]
-}
-
-function guessIndustry(input: WizardInput): string {
-  const text = `${input.business} ${input.idealCustomer}`.toLowerCase()
-  if (text.includes('dental') || text.includes('dentist')) return 'dental'
-  if (text.includes('restaurant') || text.includes('cafe') || text.includes('food'))
-    return 'restaurants'
-  if (text.includes('dog') || text.includes('pet')) return 'pet care'
-  if (text.includes('web') || text.includes('website')) return 'local businesses'
-  return 'local businesses'
 }
 
 function shorten(text: string, max = 100): string {

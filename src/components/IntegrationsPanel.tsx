@@ -123,7 +123,11 @@ export function IntegrationsPanel({
           ? `Found ${people.length} leads. Your next plan will use the first match.`
           : 'No leads returned. Try broader keywords or location.',
     )
-    setStatus(result.message ?? 'Apollo search complete.')
+    setStatus(
+      people.length > 0
+        ? `Found ${Math.min(people.length, 10)} leads (max 10 during beta).`
+        : (result.message ?? 'Search complete.'),
+    )
   }
 
   function toggleDrip() {

@@ -1,3 +1,5 @@
+import { APOLLO_MAX_RESULTS } from './apolloConfig.js'
+
 export interface ApolloPerson {
   id?: string
   first_name?: string
@@ -26,12 +28,16 @@ export async function searchApolloPeople(
   apiKey: string,
   keywords: string,
   location: string,
-  options?: { skipTitles?: boolean },
+  options?: { skipTitles?: boolean; perPage?: number },
 ): Promise<ApolloSearchResult> {
   try {
+    const perPage = Math.min(
+      APOLLO_MAX_RESULTS,
+      Math.max(1, options?.perPage ?? APOLLO_MAX_RESULTS),
+    )
     const params = new URLSearchParams()
     params.set('q_keywords', keywords)
-    params.set('per_page', '5')
+    params.set('per_page', String(perPage))
     params.set('page', '1')
 
     if (location.trim()) {

@@ -10,10 +10,20 @@ export interface PlanSlide {
 
 interface PlanCarouselProps {
   slides: PlanSlide[]
-  onLaunch: () => void
+  onFinish: () => void
+  finishLabel?: string
+  /** Slide id where Next stays disabled until gate clears */
+  gateSlideId?: string
+  canAdvance?: boolean
 }
 
-export function PlanCarousel({ slides, onLaunch }: PlanCarouselProps) {
+export function PlanCarousel({
+  slides,
+  onFinish,
+  finishLabel = 'Review warm up drip →',
+  gateSlideId,
+  canAdvance = true,
+}: PlanCarouselProps) {
   const [index, setIndex] = useState(0)
   const total = slides.length
   const isFirst = index === 0
@@ -23,6 +33,10 @@ export function PlanCarousel({ slides, onLaunch }: PlanCarouselProps) {
     setIndex((i) => Math.max(0, i - 1))
   }, [])
 
+  const gated = Boolean(
+    gateSlideId && slides[index]?.id === gateSlideId && !canAdvance,
+  )
+
   const goNext = useCallback(() => {
     setIndex((i) => Math.min(total - 1, i + 1))
   }, [total])
@@ -30,11 +44,11 @@ export function PlanCarousel({ slides, onLaunch }: PlanCarouselProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft') goPrev()
-      if (e.key === 'ArrowRight' && !isLast) goNext()
+      if (e.key === 'ArrowRight' && !isLast && !gated) goNext()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goPrev, goNext, isLast])
+  }, [goPrev, goNext, isLast, gated])
 
   return (
     <div className="plan-carousel">
@@ -88,15 +102,16 @@ export function PlanCarousel({ slides, onLaunch }: PlanCarouselProps) {
           <button
             type="button"
             className="plan-carousel__launch"
-            onClick={onLaunch}
+            onClick={onFinish}
           >
-            Launch →
+            {finishLabel}
           </button>
         ) : (
           <button
             type="button"
             className="plan-carousel__arrow plan-carousel__arrow--next"
             onClick={goNext}
+            disabled={gated}
             aria-label="Next"
           >
             Next →
