@@ -94,7 +94,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 42rem;
+  max-width: 20rem;
 }
 
 .landing__visual .hero-arc {
@@ -182,7 +182,7 @@
   .landing__visual {
     grid-column: 2;
     grid-row: 1;
-    max-width: none;
+    max-width: 22rem;
     justify-self: center;
   }
 }

@@ -129,27 +129,94 @@
   font-size: clamp(0.625rem, 2vw, 0.8125rem);
 }
 
-.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(1),
-.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(6) {
-  transform: translateY(2.65rem);
+/* Compact ring: six reps on a circle (less width than horizontal arc) */
+.hero-arc--circle .hero-arc__ring {
+  position: relative;
+  display: block;
+  width: min(16.5rem, 82vw);
+  height: min(16.5rem, 82vw);
+  min-height: unset;
+  margin: 0 auto;
+  padding: 0;
+  gap: 0;
 }
 
-.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(2),
-.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(5) {
-  transform: translateY(1.25rem);
+.hero-arc--circle .hero-arc__item {
+  --orbit: 5.35rem;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  flex: none;
+  max-width: none;
+  width: 4.5rem;
 }
 
-.hero-arc--large .hero-arc__ring .hero-arc__item:nth-child(3) {
-  transform: translateY(-0.2rem) scale(1.08);
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(1) {
+  --slot: 0;
+  z-index: 2;
+  transform: translate(-50%, -50%) rotate(-90deg) translateY(calc(-1 * var(--orbit))) rotate(90deg);
+}
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(2) {
+  --slot: 1;
+  z-index: 3;
+  transform: translate(-50%, -50%) rotate(-30deg) translateY(calc(-1 * var(--orbit))) rotate(30deg);
+}
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(3) {
+  --slot: 2;
+  z-index: 4;
+  transform: translate(-50%, -50%) rotate(30deg) translateY(calc(-1 * var(--orbit))) rotate(-30deg);
+}
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(4) {
+  --slot: 3;
+  z-index: 4;
+  transform: translate(-50%, -50%) rotate(90deg) translateY(calc(-1 * var(--orbit))) rotate(-90deg);
+}
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(5) {
+  --slot: 4;
+  z-index: 3;
+  transform: translate(-50%, -50%) rotate(150deg) translateY(calc(-1 * var(--orbit))) rotate(-150deg);
+}
+.hero-arc--circle .hero-arc__ring .hero-arc__item:nth-child(6) {
+  --slot: 5;
+  z-index: 2;
+  transform: translate(-50%, -50%) rotate(210deg) translateY(calc(-1 * var(--orbit))) rotate(-210deg);
+}
+
+.hero-arc--circle .hero-arc__item:hover .hero-arc__avatar-wrap {
+  transform: scale(1.06);
+}
+
+.hero-arc--circle.hero-arc--large {
+  max-width: min(18rem, 100%);
+}
+
+.hero-arc--circle.hero-arc--large .hero-arc__ring {
+  width: min(18rem, 84vw);
+  height: min(18rem, 84vw);
+}
+
+.hero-arc--circle.hero-arc--large .hero-arc__item {
+  --orbit: 6.25rem;
+  width: 4.75rem;
+}
+
+.hero-arc--circle.hero-arc--large .hero-arc__avatar {
+  width: clamp(3rem, 9vw, 4.25rem);
+  height: clamp(3rem, 9vw, 4.25rem);
 }
 
 @media (min-width: 900px) {
-  .hero-arc__ring {
+  .hero-arc:not(.hero-arc--circle) .hero-arc__ring {
     gap: 1.25rem;
     min-height: 12.5rem;
   }
 
-  .hero-arc--large .hero-arc__ring {
-    min-height: 15.5rem;
+  .hero-arc--circle.hero-arc--large .hero-arc__ring {
+    width: 19rem;
+    height: 19rem;
+  }
+
+  .hero-arc--circle.hero-arc--large .hero-arc__item {
+    --orbit: 6.75rem;
   }
 }

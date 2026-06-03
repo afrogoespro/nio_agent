@@ -19,7 +19,7 @@ export function HeroAgentArc({
   showCaption = true,
   size = 'default',
 }: HeroAgentArcProps) {
-  const sizeClass = size === 'large' ? ' hero-arc--large' : ''
+  const sizeClass = size === 'large' ? ' hero-arc--large hero-arc--circle' : ''
   return (
     <div
       className={`hero-arc${showCaption ? '' : ' hero-arc--compact'}${sizeClass}`}
